@@ -134,13 +134,11 @@
         
         try {
             pyodide = await loadPyodide();
-            await pyodide.loadPackage(['micropip']);
             
-            // Install ply
-            await pyodide.runPythonAsync(`
-                import micropip
-                await micropip.install('ply')
-            `);
+            // Install ply using micropip
+            await pyodide.loadPackage("micropip");
+            const micropip = pyodide.pyimport("micropip");
+            await micropip.install(['ply']);
             
             // Load the DCP parser
             await loadDCPParser();
@@ -164,7 +162,7 @@
     async function loadDCPParser() {
         // Load all parser modules
         const parserCode = await fetch('static/js/dcp_parser_bundle.py').then(r => r.text());
-        await pyodide.runPython(parserCode);
+        pyodide.runPython(parserCode);
     }
     
     function overrideParseFunction() {
