@@ -63,6 +63,8 @@
         $(".answer").click(showParseTree);
         // Listen for change in difficulty.
         $(window).bind('hashchange', setDifficulty);
+        // Set up event delegation for "New Expression" button (created dynamically)
+        $(document).on('click', '#newExpression', loadNewExpression);
         
         console.log('Quiz started successfully');
     };
@@ -201,8 +203,7 @@
         
         // Increase/decrease difficulty
         updateLevel(curvature === answer);
-        // Listen to new expression button.
-        $("#newExpression").click(loadNewExpression);
+        // Event handler for "New Expression" button is already set up in startQuiz()
     }
 
     /**
