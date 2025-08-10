@@ -101,7 +101,7 @@ class Atom(object):
            constant.name ==  settings.MINUS + constant.subexpressions[0].name):
             try:
                 return int(constant.name)
-            except exceptions.ValueError:
+            except ValueError:
                 return float(constant.name)
         else:
             return constant
