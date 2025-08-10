@@ -217,6 +217,10 @@ os.makedirs('dcp_parser/expression', exist_ok=True)
 os.makedirs('dcp_parser/json', exist_ok=True)
         `);
         
+        // Determine base path for GitHub Pages deployment
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        const basePath = isGitHubPages ? '/dcp_site' : '';
+        
         // Load DCP parser files via HTTP (since they're in our project)
         const dcpFiles = [
             'dcp_parser/__init__.py',
@@ -249,10 +253,13 @@ os.makedirs('dcp_parser/json', exist_ok=True)
         // Load each file
         for (const filePath of dcpFiles) {
             try {
-                const response = await fetch(filePath);
+                const fullPath = basePath + '/' + filePath;
+                const response = await fetch(fullPath);
                 if (response.ok) {
                     const content = await response.text();
                     pyodide.FS.writeFile(filePath, content);
+                } else {
+                    console.warn(`Failed to load ${fullPath}: ${response.status}`);
                 }
             } catch (e) {
                 console.warn(`Error loading ${filePath}:`, e);
