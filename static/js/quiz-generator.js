@@ -30,18 +30,22 @@ function getRandomExpressionTree(possibilities, probTerminate, probIncrease) {
     const terminal = Math.random() < probTerminate;
     
     // Filter operators based on possibilities and terminal constraint
+    // Django logic: Q(positive=expr_type["positive"]) | Q(positive=True)
+    // This means: include if (op.positive == possibility.positive) OR (op.positive == True)
     let candidateOperators = [];
     for (const possibility of possibilities) {
         const filtered = QUIZ_OPERATORS.filter(op => {
-            // Terminal constraint is the most important for difficulty
+            // Exact terminal match (no "OR True" logic here)
             const terminalMatch = (op.terminal === terminal);
             
-            // For now, be more permissive with curvature to focus on difficulty working
-            const curvatureMatch = (possibility.convex && op.convex) || 
-                                  (possibility.concave && op.concave) ||
-                                  (!possibility.convex && !possibility.concave); // non-DCP case
+            // Django filtering logic with OR conditions:
+            // Include if property matches exactly OR operator is flexible (True)
+            const positiveMatch = (op.positive === possibility.positive) || (op.positive === true);
+            const negativeMatch = (op.negative === possibility.negative) || (op.negative === true);
+            const convexMatch = (op.convex === possibility.convex) || (op.convex === true);
+            const concaveMatch = (op.concave === possibility.concave) || (op.concave === true);
             
-            return terminalMatch && curvatureMatch;
+            return terminalMatch && positiveMatch && negativeMatch && convexMatch && concaveMatch;
         });
         candidateOperators = candidateOperators.concat(filtered);
     }

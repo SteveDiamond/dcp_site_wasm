@@ -24,9 +24,9 @@
     };
 
     const EXPRESSION_TYPES = [
-        {convex: true, concave: false, dcp:true},
-        {convex: false, concave: true, dcp:true},
-        {convex: false, concave: false, dcp:false},
+        {convex: true, concave: false, positive: false, negative: false, dcp:true},
+        {convex: false, concave: true, positive: false, negative: false, dcp:true},
+        {convex: false, concave: false, positive: false, negative: false, dcp:false},
     ];
     
     // Internal curvature name to display name.
