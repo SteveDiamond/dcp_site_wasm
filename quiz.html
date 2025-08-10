@@ -148,6 +148,7 @@
   <script>
     // Initialize Pyodide and quiz functionality
     let pyodide = null;
+    window.pyodideReady = false;
     
     // Update TreeConstants for client-side paths
     TreeConstants.IMAGE_PREFIX = "static/images/";
@@ -191,6 +192,7 @@
             
             // Start the quiz
             console.log('Initialization complete - starting quiz');
+            window.pyodideReady = true;  // Set global flag
             if (typeof startQuiz === 'function') {
                 startQuiz();
             }

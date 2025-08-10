@@ -70,6 +70,14 @@
     // Generate and display a random expression.
     function loadNewExpression() {
         console.log('Loading new expression...');
+        
+        // Check if Pyodide is ready
+        if (!window.pyodideReady) {
+            console.log('Pyodide not ready yet, waiting...');
+            setTimeout(loadNewExpression, 500);  // Try again in 500ms
+            return;
+        }
+        
         const difficulty = getDifficulty();
         
         // Display the current difficulty.
