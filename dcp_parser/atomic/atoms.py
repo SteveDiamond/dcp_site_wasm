@@ -35,7 +35,7 @@ class Atom(object):
         if len(args) == 0:
             raise TypeError("No arguments given to '%s'." % self.name())
         # Convert numeric constants to Constants
-        self.args = map(Expression.type_check, list(args))
+        self.args = list(map(Expression.type_check, list(args)))
         # Arguments passed into the Atom. Defaults to self.args,
         # but if the Atom is defined in terms of another Atom
         # self.args could be different.
@@ -61,7 +61,7 @@ class Atom(object):
 
     # Stores the original args in case they differ from self.args.
     def save_original_args(self, original_args):
-        self.original_args = map(Expression.type_check, original_args)
+        self.original_args = list(map(Expression.type_check, original_args))
 
     # Determines sign from args.
     @abc.abstractmethod
