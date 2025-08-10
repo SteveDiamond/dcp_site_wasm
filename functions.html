@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Functions</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <!-- Bootstrap and jQuery + plugins -->
+  <script src="static/jquery-1.9.1.min.js"></script>
+  <script src="static/jquery.cookie.js"></script>
+  <script src="static/bootstrap/js/bootstrap.min.js"></script>
+  <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+  <!-- D3.js -->
+  <script type="text/javascript" src="static/d3.v3/d3.v3.min.js"></script>
+
+  <!-- MathJax -->
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+  });
+  </script>
+
+  <!-- Site wide js and CSS -->
+  <link href="static/css/treeInteraction.css" rel="stylesheet">
+  <script type="text/javascript" src="static/js/base.js"></script>
+
+  <!-- Thumbnail -->
+  <link rel="shortcut icon" href="static/images/convex.ico" />
+</head>
+<body>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <ul class="nav">
+        <!-- Button to trigger feedback modal -->
+        <li>
+          <div>
+            <a role="button" class="btn btn-primary nav-leftmost" data-toggle="modal" data-target="#feedback">Feedback</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid below-nav">
+    <div class="row-fluid">
+      <nav>
+        <ul class="nav nav-pills nav-stacked span1">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="rules.html">Rules</a></li>
+          <li class="active"><a href="functions.html">Functions</a></li>
+          <li><a href="analyzer.html">Analyzer</a></li>
+          <li><a href="quiz.html">Quiz</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      
+      <div class="span10">
+        <table class="table table-striped table-bordered">
+          <thead>
+            <tr>
+              <td>Function</td>
+              <td>Meaning</td>
+              <td>Domain</td>
+              <td>Sign</td>
+              <td>Curvature</td>
+              <td>Monotonicity</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>abs(x)</td>
+              <td>$ |x| $</td>
+              <td>$ x \in \mathbf{R} $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr. for $ x \geq 0 $</p>
+                  <p><img src="static/images/decreasing.svg" width="20"> decr. for $ x \leq 0 $</p></td>
+            </tr>
+            <tr>
+              <td>entr(x)</td>
+              <td>$ \begin{cases} -x \log (x) & x > 0 \\ 0 & x = 0 \end{cases} $</td>
+              <td>$ x \geq 0 $</td>
+              <td><img src="static/images/unknown.svg" width="15"> unknown</td>
+              <td><img src="static/images/concave.svg" width="15"> concave</td>
+              <td><p>None</p></td>
+            </tr>
+            <tr>
+              <td>exp(x)</td>
+              <td>$ e^{x} $</td>
+              <td>$ x \in \mathbf{R} $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr.</p></td>
+            </tr>
+            <tr>
+              <td>geo_mean(x1,...,xk)</td>
+              <td>$ (x_{1} \cdots x_{k})^{1/k} $</td>
+              <td>$ x_{i} \geq 0 $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/concave.svg" width="15"> concave</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr.</p></td>
+            </tr>
+            <tr>
+              <td>huber(x)</td>
+              <td>$ \begin{cases} 2|x|-1 & |x| \ge 1 \\ |x|^{2} & |x| < 1 \end{cases} $</td>
+              <td>$ x \in \mathbf{R} $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr. for $ x \geq 0 $</p>
+                  <p><img src="static/images/decreasing.svg" width="20"> decr. for $ x \leq 0 $</p></td>
+            </tr>
+            <tr>
+              <td>inv_pos(x)</td>
+              <td>$ 1/x $</td>
+              <td>$ x > 0 $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/decreasing.svg" width="20"> decr.</p></td>
+            </tr>
+            <tr>
+              <td>kl_div(x,y)</td>
+              <td>$ x \log (x/y)-x+y $</td>
+              <td>$ x,y > 0 $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p>None</p></td>
+            </tr>
+            <tr>
+              <td>log(x)</td>
+              <td>$ \log(x) $</td>
+              <td>$ x > 0 $</td>
+              <td><img src="static/images/unknown.svg" width="15"> unknown</td>
+              <td><img src="static/images/concave.svg" width="15"> concave</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr.</p></td>
+            </tr>
+            <tr>
+              <td>log_sum_exp(x1,...,xk)</td>
+              <td>$ \log \left(e^{x_{1}} + \cdots + e^{x_{k}} \right) $</td>
+              <td>$ x \in \mathbf{R}^{k} $</td>
+              <td><img src="static/images/unknown.svg" width="15"> unknown</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr.</p></td>
+            </tr>
+            <tr>
+              <td>max(x1,...,xk)</td>
+              <td>$ \max \left\{ x_{1}, \ldots , x_{k} \right\} $</td>
+              <td>$ x \in \mathbf{R}^{k} $</td>
+              <td>max(sign(arguments))</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr.</p></td>
+            </tr>
+            <tr>
+              <td>min(x1,...,xk)</td>
+              <td>$ \min \left\{ x_{1}, \ldots , x_{k} \right\} $</td>
+              <td>$ x \in \mathbf{R}^{k} $</td>
+              <td>min(sign(arguments))</td>
+              <td><img src="static/images/concave.svg" width="15"> concave</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr.</p></td>
+            </tr>
+            <tr>
+              <td>norm2(x1,...,xk)</td>
+              <td>$ \sqrt{x_{1}^{2} + \cdots + x_{k}^{2}} $</td>
+              <td>$ x \in \mathbf{R}^{k} $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr. for $ x \geq 0 $</p>
+                  <p><img src="static/images/decreasing.svg" width="20"> decr. for $ x \leq 0 $</p></td>
+            </tr>
+            <tr>
+              <td>norm1(x1,...,xk)</td>
+              <td>$ |x_{1}| + \cdots + |x_{k}| $</td>
+              <td>$ x \in \mathbf{R}^{k} $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr. for $ x \geq 0 $</p>
+                  <p><img src="static/images/decreasing.svg" width="20"> decr. for $ x \leq 0 $</p></td>
+            </tr>
+            <tr>
+              <td>norm_inf(x1,...,xk)</td>
+              <td>$ \max \left\{ |x_{1}|, \ldots, |x_{k}| \right\} $</td>
+              <td>$ x \in \mathbf{R}^{k} $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr. for $ x \geq 0 $</p>
+                  <p><img src="static/images/decreasing.svg" width="20"> decr. for $ x \leq 0 $</p></td>
+            </tr>
+            <tr>
+              <td>pos(x)</td>
+              <td>$ \max \{x,0\} $</td>
+              <td>$ x \in \mathbf{R}$</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr.</p></td>
+            </tr>
+            <tr>
+              <td>quad_over_lin(x,y)</td>
+              <td>$ x^{2}/y $</td>
+              <td>$x \in \mathbf{R}$, y > 0</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr. for $ x \geq 0 $</p>
+                  <p><img src="static/images/decreasing.svg" width="20"> decr. for $ x \leq 0 $</p>
+                  <p><img src="static/images/decreasing.svg" width="20"> decr. in y</p></td>
+            </tr>
+            <tr>
+              <td>sqrt(x)</td>
+              <td>$ \sqrt{x} $</td>
+              <td>$ x \geq 0 $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/concave.svg" width="15"> concave</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr.</p></td>
+            </tr>
+            <tr>
+              <td>square(x)</td>
+              <td>$ x^{2} $</td>
+              <td>$ x \in \mathbf{R} $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr. for $ x \geq 0 $</p>
+                  <p><img src="static/images/decreasing.svg" width="20"> decr. for $ x \leq 0 $</p></td>
+            </tr>
+            <tr>
+              <td>pow(x,p), $\text{ } p \geq 1 $</td>
+              <td>$ x^{p} $</td>
+              <td>$ x \geq 0 $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr.</p></td>
+            </tr>
+            <tr>
+              <td>pow(x,p), $\text{ } 0 < p < 1 $</td>
+              <td>$ x^{p} $</td>
+              <td>$ x \geq 0 $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/concave.svg" width="15"> concave</td>
+              <td><p><img src="static/images/increasing.svg" width="20"> incr.</p></td>
+            </tr>
+            <tr>
+              <td>pow(x,p), $\text{ } p \leq 0 $</td>
+              <td>$ x^{p} $</td>
+              <td>$ x > 0 $</td>
+              <td><img src="static/images/positive.svg" width="15"> positive</td>
+              <td><img src="static/images/convex.svg" width="15"> convex</td>
+              <td><p><img src="static/images/decreasing.svg" width="20"> decr.</p></td>
+            </tr>
+          </tbody>
+        <table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="feedback" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="feedbackLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h4 id="feedbackLabel">Let us know how to improve the site!</h4>
+    </div>
+    <div class="modal-body">
+      <textarea class="feedback" rows="10"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button class="btn btn-primary feedback" data-dismiss="modal">Send Feedback</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rules</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <!-- Bootstrap and jQuery + plugins -->
+  <script src="static/jquery-1.9.1.min.js"></script>
+  <script src="static/jquery.cookie.js"></script>
+  <script src="static/bootstrap/js/bootstrap.min.js"></script>
+  <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+  <!-- D3.js -->
+  <script type="text/javascript" src="static/d3.v3/d3.v3.min.js"></script>
+
+  <!-- MathJax -->
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+  });
+  </script>
+
+  <!-- Site wide js and CSS -->
+  <link href="static/css/treeInteraction.css" rel="stylesheet">
+  <script type="text/javascript" src="static/js/base.js"></script>
+
+  <!-- Thumbnail -->
+  <link rel="shortcut icon" href="static/images/convex.ico" />
+</head>
+<body>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <ul class="nav">
+        <!-- Button to trigger feedback modal -->
+        <li>
+          <div>
+            <a role="button" class="btn btn-primary nav-leftmost" data-toggle="modal" data-target="#feedback">Feedback</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid below-nav">
+    <div class="row-fluid">
+      <nav>
+        <ul class="nav nav-pills nav-stacked span1">
+          <li><a href="index.html">Home</a></li>
+          <li class="active"><a href="rules.html">Rules</a></li>
+          <li><a href="functions.html">Functions</a></li>
+          <li><a href="analyzer.html">Analyzer</a></li>
+          <li><a href="quiz.html">Quiz</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      
+      <div class="span10">
+        <div class="span10">
+
+        <h2>Expressions</h2>
+
+        <p>Expressions in the <a href="analyzer.html">DCP analyzer</a> and <a href="quiz.html">quiz</a> are formed from the variables <code>x, y, z, u, v, w</code>, the parameters <code>a, b, c, d, e, f</code>, numerical constants such as <code>3</code> and <code>-2.44</code>, the standard arithmetic operators <code>+, -, *, /</code>, and a library of <a href="functions.html">functions</a>. For simplicity, all expressions are scalar. Some examples are</p>
+
+        <pre><code>3.69 + b/3
+x - 4*u
+sqrt(x) - min(u, v - a)
+max(2.66 - sqrt(u), square(x + 2*y))</code></pre>
+
+        <h2>Sign</h2>
+
+        <p>Each (sub)expression is flagged as <em>positive</em> (non-negative), <em>negative</em> (non-positive), or <em>unknown</em>. </p>
+
+        <p>The signs of larger expressions are determined from the signs of their subexpressions. For example, the sign of the expression <code>expr1*expr2</code> is</p>
+
+        <ul>
+        <li>Positive if <code>expr1</code> and <code>expr2</code> have the same (known) sign.</li>
+        <li>Negative if <code>expr1</code> and <code>expr2</code> have opposite (known) signs.</li>
+        <li>Unknown if either expression has unknown sign.</li>
+        </ul>
+
+        <p>The sign given to an expression is always correct. But DCP sign analysis may flag an expression as unknown sign when the sign could be figured out through more complex analysis. For instance, <code>x*x</code> is positive but has unknown sign by the rules above.</p>
+
+        <h2>Curvature</h2>
+
+        <p>Each (sub)expression is flagged as one of the following curvatures</p>
+
+          <table class="table table-striped table-bordered" style="font-size: 14;">
+            <tr>
+             <th>Curvature</th>
+             <th>Meaning</th>
+            </tr>
+            <tr>
+              <td>constant</td>
+              <td>$ f(x) $ independent of $ x $ </td>
+            </tr>
+            <tr>
+              <td>affine</td>
+              <td>$ f(\theta x + (1-\theta)y) = \theta f(x) + (1-\theta)f(y), \; \forall x, \; y,\; \theta \in [0,1] $ </td>
+            </tr>
+            <tr>
+              <td>convex</td>
+              <td>$ f(\theta x + (1-\theta)y) \leq \theta f(x) + (1-\theta)f(y), \; \forall x, \; y,\; \theta \in [0,1] $ </td>
+            </tr>
+            <tr>
+              <td>concave</td>
+              <td>$ f(\theta x + (1-\theta)y) \geq \theta f(x) + (1-\theta)f(y), \; \forall x, \; y,\; \theta \in [0,1] $ </td>
+            </tr>
+            <tr>
+              <td>unknown</td>
+              <td>DCP analysis cannot determine the curvature</td>
+            </tr>
+          </table>
+
+        <p>using the curvature rules given below. As with sign analysis, the conclusion is always correct, but the simple analysis can flag expressions as unknown even when they are convex or concave. Note that any constant expression is also affine, and any affine expression is convex and concave.</p>
+
+        <h2>Curvature Rules</h2>
+
+        <p>DCP analysis is based on applying a general composition theorem from convex analysis to each (sub)expression.</p>
+
+        <p>$f(expr_1, expr_2, ..., expr_n)$ is convex if $\text{ } f$ is a convex function and for each $expr_{i}$ one of the following conditions holds:</p>
+
+        <ul>
+        <li>$f$ is increasing in argument $i$ and $expr_{i}$ is convex.</li>
+        <li>$f$ is decreasing in argument $i$ and $expr_{i}$ is concave.</li>
+        <li>$expr_{i}$ is affine.</li>
+        </ul>
+
+        <p>$f(expr_1, expr_2, ..., expr_n)$ is concave if $\text{ } f$ is a concave function and for each $expr_{i}$ one of the following conditions holds:</p>
+
+        <ul>
+        <li>$f$ is increasing in argument $i$ and $expr_{i}$ is concave.</li>
+        <li>$f$ is decreasing in argument $i$ and $expr_{i}$ is convex.</li>
+        <li>$expr_{i}$ is affine.</li>
+        </ul>
+
+        <p>$f(expr_1, expr_2, ..., expr_n)$ is affine if $\text{ } f$ is an affine function and each $expr_{i}$ is affine.</p>
+
+        <p>If none of the three rules apply, the expression $\text{ } f(expr_1, expr_2, ..., expr_n)$ is marked as having unknown curvature.</p>
+
+        <p>Whether a function is increasing or decreasing in an argument may depend on the sign of the argument. For instance, <code>square</code> is increasing for positive arguments and decreasing for negative arguments. </p>
+
+        <h2>Infix Operators</h2>
+
+        <p>The infix operators <code>+, -, *, /</code> are treated exactly like functions. The infix operators <code>+</code> and <code>-</code> are affine, so the rules above are used to flag the curvature. For example, <code>expr1 + expr2</code> is flagged as convex if <code>expr1</code> and <code>expr2</code> are convex.</p>
+
+        <p><code>expr1*expr2</code> is allowed only when one of the expressions is constant. <code>expr1/expr2</code> is allowed only when <code>expr2</code> is constant. The curvature rules above apply. For example, <code>expr1/expr2</code> is convex when <code>expr1</code> is concave and <code>expr2</code> is negative and constant.</p>
+
+        <h2>Example 1</h2>
+        <p>DCP analysis breaks expressions down into subexpressions. The tree visualization below shows how this works for the expression <code>2*square(x) + 3</code>. Each subexpression is shown in a blue box. We mark its curvature on the left and its sign on the right.</p>
+
+        <p><img class="dcp-example" src="static/images/example1.png" alt="2*square(x) + 3" title="" /></p>
+
+        <h2>Example 2</h2>
+        <p>We'll walk through the application of the DCP rules to the expression <code>sqrt(1 + square(x))</code>.</p>
+
+        <p><img class="dcp-example" src="static/images/example2.png" alt="sqrt(1 + square(x))" title="" /></p>
+
+        <p>The variable <code>x</code> has affine curvature and unknown sign. The <code>square</code> function is convex and non-monotone for arguments of unknown sign. It can take the affine expression <code>x</code> as an argument; the result <code>square(x)</code> is convex.</p>
+
+        <p>The arithmetic operator <code>+</code> is affine and increasing, so the composition <code>1 + square(x)</code> is convex by the curvature rule for convex functions. The <code>sqrt</code> function is concave and increasing, which means it can only take a concave argument. Since <code>1 + square(x)</code> is convex, <code>sqrt(1 + square(x))</code> violates the DCP rules and cannot be verified as convex.</p>
+
+
+        <p>In fact, <code>sqrt(1 + square(x))</code> is a convex function of <code>x</code>, but the DCP rules are not able to verify convexity.   If the expression is written as <code>norm2(1, x)</code>, the L2 norm of the vector $[1,x]$,  which has the same value as <code>sqrt(1 + square(x))</code>, then it will be certified as convex using the DCP rules.</p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="feedback" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="feedbackLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h4 id="feedbackLabel">Let us know how to improve the site!</h4>
+    </div>
+    <div class="modal-body">
+      <textarea class="feedback" rows="10"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button class="btn btn-primary feedback" data-dismiss="modal">Send Feedback</button>
+    </div>
+  </div>
+</body>
+</html>

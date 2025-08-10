@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <!-- Bootstrap and jQuery + plugins -->
+  <script src="static/jquery-1.9.1.min.js"></script>
+  <script src="static/jquery.cookie.js"></script>
+  <script src="static/bootstrap/js/bootstrap.min.js"></script>
+  <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+  <!-- D3.js -->
+  <script type="text/javascript" src="static/d3.v3/d3.v3.min.js"></script>
+
+  <!-- MathJax -->
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+  });
+  </script>
+
+  <!-- Site wide js and CSS -->
+  <link href="static/css/treeInteraction.css" rel="stylesheet">
+  <script type="text/javascript" src="static/js/base.js"></script>
+
+  <!-- Thumbnail -->
+  <link rel="shortcut icon" href="static/images/convex.ico" />
+</head>
+<body>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <ul class="nav">
+        <!-- Button to trigger feedback modal -->
+        <li>
+          <div>
+            <a role="button" class="btn btn-primary nav-leftmost" data-toggle="modal" data-target="#feedback">Feedback</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid below-nav">
+    <div class="row-fluid">
+      <nav>
+        <ul class="nav nav-pills nav-stacked span1">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="rules.html">Rules</a></li>
+          <li><a href="functions.html">Functions</a></li>
+          <li><a href="analyzer.html">Analyzer</a></li>
+          <li class="active"><a href="quiz.html">Quiz</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      
+      <div class="span10">
+        <h1>DCP Quiz</h1>
+        
+        <div class="alert alert-info">
+          <strong>Note:</strong> The quiz functionality is not yet implemented in this client-side version. 
+          Please use the <a href="analyzer.html">Analyzer</a> to practice identifying DCP properties of expressions.
+        </div>
+        
+        <p>The quiz will test your understanding of DCP rules by presenting randomly generated expressions and asking you to identify their curvature and sign.</p>
+        
+        <p>In the meantime, try analyzing these expressions in the <a href="analyzer.html">Analyzer</a>:</p>
+        
+        <ul>
+          <li><code>square(x) + square(y)</code> - Should be convex</li>
+          <li><code>sqrt(x) + sqrt(y)</code> - Should be concave</li>
+          <li><code>log(exp(x) + exp(y))</code> - Should be convex (log-sum-exp)</li>
+          <li><code>x*y</code> - Should be unknown curvature (not DCP)</li>
+          <li><code>max(x, 0)</code> - Should be convex (same as pos(x))</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="feedback" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="feedbackLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h4 id="feedbackLabel">Let us know how to improve the site!</h4>
+    </div>
+    <div class="modal-body">
+      <textarea class="feedback" rows="10"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button class="btn btn-primary feedback" data-dismiss="modal">Send Feedback</button>
+    </div>
+  </div>
+</body>
+</html>

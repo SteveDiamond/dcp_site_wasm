@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <!-- Bootstrap and jQuery + plugins -->
+  <script src="static/jquery-1.9.1.min.js"></script>
+  <script src="static/jquery.cookie.js"></script>
+  <script src="static/bootstrap/js/bootstrap.min.js"></script>
+  <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+  <!-- D3.js -->
+  <script type="text/javascript" src="static/d3.v3/d3.v3.min.js"></script>
+
+  <!-- MathJax -->
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+  });
+  </script>
+
+  <!-- Site wide js and CSS -->
+  <link href="static/css/treeInteraction.css" rel="stylesheet">
+  <script type="text/javascript" src="static/js/base.js"></script>
+
+  <!-- Thumbnail -->
+  <link rel="shortcut icon" href="static/images/convex.ico" />
+</head>
+<body>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <ul class="nav">
+        <!-- Button to trigger feedback modal -->
+        <li>
+          <div>
+            <a role="button" class="btn btn-primary nav-leftmost" data-toggle="modal" data-target="#feedback">Feedback</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid below-nav">
+    <div class="row-fluid">
+      <nav>
+        <ul class="nav nav-pills nav-stacked span1">
+          <li class="active"><a href="index.html">Home</a></li>
+          <li><a href="rules.html">Rules</a></li>
+          <li><a href="functions.html">Functions</a></li>
+          <li><a href="analyzer.html">Analyzer</a></li>
+          <li><a href="quiz.html">Quiz</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      
+      <div class="span10">
+        <h1>Disciplined Convex Programming</h1>
+
+        <p>This website is designed to teach disciplined convex programming (DCP). DCP is a system for constructing mathematical expressions with known curvature from a given library of base functions. DCP is used by the <a href="http://www.stanford.edu/~boyd/cvxbook/">convex optimization</a> modeling languages <a href="http://cvxr.com/cvx/">CVX</a>, <a href="https://www.cvxpy.org/">CVXPY</a>, <a href="https://github.com/JuliaOpt/Convex.jl">Convex.jl</a>, and <a href="https://cvxr.rbind.io/">CVXR</a>  to ensure that the specified optimization problems are convex.</p>
+
+        <p>After reading about the <a href="rules.html">DCP rules</a>, visit the <a href="quiz.html">DCP Quiz</a> to test your understanding, or type expressions into the <a href="analyzer.html">DCP Analyzer</a>.</p>
+
+        <h2>Related Links</h2>
+
+        <p>The following links offer more information on convex optimization and DCP:</p>
+
+        <ul>
+        <li><p><a href="http://www.stanford.edu/~boyd/cvxbook/">Convex Optimization</a>, a book by Stephen Boyd and Lieven Vandenberghe.</p></li>
+        <li><p><a href="http://www.stanford.edu/class/ee364a/">EE364a</a>, a Stanford course on convex optimization.</p></li>
+        <li><p><a href="https://www.cvxpy.org/tutorial/index.html">CVXPY Tutorial</a>, a complete guide to CVXPY and its features.</p></li>
+        <li><p><a href="http://www.stanford.edu/~boyd/papers/disc_cvx_prog.html">Disciplined Convex Programming</a>, a paper by Michael Grant.</p></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="feedback" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="feedbackLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h4 id="feedbackLabel">Let us know how to improve the site!</h4>
+    </div>
+    <div class="modal-body">
+      <textarea class="feedback" rows="10"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button class="btn btn-primary feedback" data-dismiss="modal">Send Feedback</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test DCP Client</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background: #dff0d8; }
+        .error { background: #f2dede; }
+    </style>
+</head>
+<body>
+    <h1>DCP Client Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function runTests() {
+            const results = document.getElementById('results');
+            
+            // Test 1: Check static files
+            try {
+                const response = await fetch('static/jquery-1.9.1.min.js');
+                if (response.ok) {
+                    results.innerHTML += '<div class="test success">✓ Static files accessible</div>';
+                } else {
+                    results.innerHTML += '<div class="test error">✗ Static files not found</div>';
+                }
+            } catch (e) {
+                results.innerHTML += '<div class="test error">✗ Static files error: ' + e.message + '</div>';
+            }
+            
+            // Test 2: Check index page
+            results.innerHTML += '<div class="test">Links to pages:</div>';
+            results.innerHTML += '<ul>';
+            results.innerHTML += '<li><a href="index.html">Home</a></li>';
+            results.innerHTML += '<li><a href="analyzer.html">Analyzer</a></li>';
+            results.innerHTML += '</ul>';
+            
+            results.innerHTML += '<div class="test">Open the browser console for any errors.</div>';
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>About</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <!-- Bootstrap and jQuery + plugins -->
+  <script src="static/jquery-1.9.1.min.js"></script>
+  <script src="static/jquery.cookie.js"></script>
+  <script src="static/bootstrap/js/bootstrap.min.js"></script>
+  <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+  <!-- D3.js -->
+  <script type="text/javascript" src="static/d3.v3/d3.v3.min.js"></script>
+
+  <!-- MathJax -->
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+  });
+  </script>
+
+  <!-- Site wide js and CSS -->
+  <link href="static/css/treeInteraction.css" rel="stylesheet">
+  <script type="text/javascript" src="static/js/base.js"></script>
+
+  <!-- Thumbnail -->
+  <link rel="shortcut icon" href="static/images/convex.ico" />
+</head>
+<body>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <ul class="nav">
+        <!-- Button to trigger feedback modal -->
+        <li>
+          <div>
+            <a role="button" class="btn btn-primary nav-leftmost" data-toggle="modal" data-target="#feedback">Feedback</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid below-nav">
+    <div class="row-fluid">
+      <nav>
+        <ul class="nav nav-pills nav-stacked span1">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="rules.html">Rules</a></li>
+          <li><a href="functions.html">Functions</a></li>
+          <li><a href="analyzer.html">Analyzer</a></li>
+          <li><a href="quiz.html">Quiz</a></li>
+          <li class="active"><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      
+      <div class="span10">
+        <h3>Credits</h3>
+
+        <p>This website was created by Steven Diamond in 2013 with help from Eric Chu and Stephen Boyd.</p>
+
+        <h3>Client-Side Version</h3>
+        
+        <p>This is a client-side version of the DCP analyzer that runs entirely in your browser using Pyodide/WebAssembly. No server is required.</p>
+
+        <h3>Source Code</h3>
+
+        <p>The source code for the website can be viewed at the links below:</p>
+
+        <ul>
+        <li><p><a href="https://github.com/SteveDiamond/dcp_site">DCP Site</a></p></li>
+        <li><p><a href="https://github.com/SteveDiamond/parser">DCP Parser</a></p></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="feedback" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="feedbackLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h4 id="feedbackLabel">Let us know how to improve the site!</h4>
+    </div>
+    <div class="modal-body">
+      <textarea class="feedback" rows="10"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button class="btn btn-primary feedback" data-dismiss="modal">Send Feedback</button>
+    </div>
+  </div>
+</body>
+</html>

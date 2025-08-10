@@ -1,0 +1,102 @@
+.node rect.tree {
+    fill: #c6dbef;
+    fill-opacity: .5;
+    stroke: #3182bd;
+    stroke-width: 1.5px;
+}
+
+.node rect.legend {
+    fill: #dff0d8;
+}
+
+.node text, #inputBox {
+    font: 14px sans-serif;
+    stroke: none;
+}
+
+.node text {
+    dominant-baseline: central;
+}
+
+line.link {
+    fill: none;
+    stroke: #9ecae1;
+    stroke-width: 1.5px;
+}
+
+line.arrow {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.5px;
+}
+
+svg {
+    display: block;
+    margin: auto;
+}
+
+.info {
+    text-align: center;
+}
+
+.navbar-inner {
+    border-radius: 0;
+}
+
+.navbar .dropdown-menu {
+    max-height: 500px;
+    overflow: auto;
+}
+
+.navbar .dropdown-menu:before {
+    content:normal;
+}
+
+.dropdown + li.divider-vertical {
+    margin-left: 0;
+}
+
+li.divider-vertical.left-of-dropdown {
+    margin-right: 0;
+}
+
+.below-nav {
+    padding-top: 62px;
+}
+
+#inputBox {
+    background-color: transparent;
+    color: black;
+    outline: none;
+    text-align: center;
+    padding: 0;
+}
+
+textarea.feedback {
+    width: 500;
+    display: block;
+}
+
+.function-title {
+    text-align: center;
+}
+
+.error-node rect {
+    fill: #f2dede;
+}
+
+.center {
+    float: none !important;
+    margin: 0 auto !important;
+}
+
+.dcp-example {
+    height: 400;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.nav-leftmost {
+    margin-left: 15px;
+}

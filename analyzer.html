@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DCP Analyzer</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <!-- Bootstrap and jQuery + plugins -->
+  <script src="static/jquery-1.9.1.min.js"></script>
+  <script src="static/jquery.cookie.js"></script>
+  <script src="static/bootstrap/js/bootstrap.min.js"></script>
+  <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+  <!-- D3.js -->
+  <script type="text/javascript" src="static/d3.v3/d3.v3.min.js"></script>
+
+  <!-- MathJax -->
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+  });
+  </script>
+
+  <!-- Site wide js and CSS -->
+  <link href="static/css/treeInteraction.css" rel="stylesheet">
+  <script type="text/javascript" src="static/js/base.js"></script>
+  
+  <!-- Tree visualization scripts -->
+  <script src="static/js/TreeConstants.js"></script>
+  <script src="static/js/TreeConstructor.js"></script>
+  <script src="static/js/TreeLayout.js"></script>
+  <script src="static/js/TreeDisplay.js"></script>
+  <script src="static/js/treeInteraction.js"></script>
+  <script src="static/js/analyzer.js"></script>
+
+  <!-- Pyodide for client-side Python -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+  <!-- Thumbnail -->
+  <link rel="shortcut icon" href="static/images/convex.ico" />
+</head>
+<body>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <ul class="nav">
+        <!-- Button to trigger feedback modal -->
+        <li>
+          <div>
+            <a role="button" class="btn btn-primary nav-leftmost" data-toggle="modal" data-target="#feedback">Feedback</a>
+          </div>
+        </li>
+        <li class="divider-vertical"></li>
+        <li>
+          <div><a href="#instructions" role="button" class="btn btn-primary" data-toggle="modal">Help</a></div>
+        </li>
+        <li class="divider-vertical"></li>
+        <li>
+          <button type="button" id="help" class="btn btn-primary">Hide Legends</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid below-nav">
+    <div class="row-fluid">
+      <nav>
+        <ul class="nav nav-pills nav-stacked span1">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="rules.html">Rules</a></li>
+          <li><a href="functions.html">Functions</a></li>
+          <li class="active"><a href="analyzer.html">Analyzer</a></li>
+          <li><a href="quiz.html">Quiz</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      <div class="span11">
+        <div id="errorPlaceholder"></div>
+        <input type="hidden" id="csrf_token" value="dummy">
+        <!--Body content-->
+        <div id="chart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="feedback" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="feedbackLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h4 id="feedbackLabel">Let us know how to improve the site!</h4>
+    </div>
+    <div class="modal-body">
+      <textarea class="feedback" rows="10"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button class="btn btn-primary feedback" data-dismiss="modal">Send Feedback</button>
+    </div>
+  </div>
+
+  <!-- Instructions Modal -->
+  <div id="instructions" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Instructions</h4>
+        </div>
+        <div class="modal-body">
+          <p>Follow the prompt in the box to see DCP analysis visualized as a tree. To modify the tree, click on any box containing an expression and edit the text.</p>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+  <script>
+    // Initialize Pyodide and override the parse endpoint
+    let pyodide = null;
+    
+    // Update TreeConstants for client-side paths
+    TreeConstants.IMAGE_PREFIX = "static/images/";
+    TreeConstants.PREAMBLE = [
+      'variable x y z u v w',
+      'parameter a b c',
+      'parameter positive d e f'
+    ];
+    
+    async function initPyodide() {
+        // Show loading message
+        const loadingMsg = document.createElement('div');
+        loadingMsg.className = 'alert alert-info';
+        loadingMsg.innerHTML = '<strong>Loading...</strong> Initializing Python environment for DCP analysis...';
+        document.getElementById('errorPlaceholder').appendChild(loadingMsg);
+        
+        try {
+            pyodide = await loadPyodide();
+            await pyodide.loadPackage(['micropip']);
+            
+            // Install ply
+            await pyodide.runPython(`
+                import micropip
+                await micropip.install('ply')
+            `);
+            
+            // Load the DCP parser
+            await loadDCPParser();
+            
+            // Override the AJAX parse function
+            overrideParseFunction();
+            
+            // Remove loading message
+            loadingMsg.remove();
+            
+            // Show tree if expression in URL
+            showTreeFromUrl();
+        } catch (error) {
+            loadingMsg.className = 'alert alert-error';
+            loadingMsg.innerHTML = '<strong>Error!</strong> Failed to initialize: ' + error.message;
+        }
+    }
+    
+    async function loadDCPParser() {
+        // Load all parser modules
+        const parserCode = await fetch('static/js/dcp_parser_bundle.py').then(r => r.text());
+        await pyodide.runPython(parserCode);
+    }
+    
+    function overrideParseFunction() {
+        // Override TreeConstructor.parseObjective to use Pyodide instead of server
+        TreeConstructor.parseObjective = function(objective, success_func, error_func) {
+            try {
+                const result = pyodide.runPython(`
+import json
+from dcp_parser.parser import Parser
+from dcp_parser.json.statement_encoder import StatementEncoder
+
+parser = Parser()
+# Add predefined variables and parameters
+for line in ${JSON.stringify(TreeConstants.PREAMBLE)}:
+    parser.parse(line)
+
+try:
+    parser.parse('''${objective}''')
+    if len(parser.statements) > 0:
+        expression = parser.statements[-1]
+        json_str = StatementEncoder().encode(expression)
+        json_str
+    else:
+        '{"error": "No valid expression found"}'
+except Exception as e:
+    json.dumps({"error": str(e)})
+                `);
+                
+                const parsed = JSON.parse(result);
+                if (parsed.error) {
+                    if (error_func) {
+                        error_func({responseText: parsed.error}, 'error', parsed.error);
+                    }
+                } else {
+                    if (success_func) success_func(result);
+                }
+            } catch (e) {
+                if (error_func) {
+                    error_func({responseText: e.toString()}, 'error', e.toString());
+                }
+            }
+        };
+        
+        // Also override the feedback function to show a message
+        $('.btn.feedback').click(function() {
+            alert('Feedback feature is not available in the client-side version.');
+        });
+    }
+    
+    // Initialize on page load
+    $(document).ready(function() {
+        initPyodide();
+    });
+  </script>
+</body>
+</html>
