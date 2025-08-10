@@ -133,18 +133,27 @@
         document.getElementById('errorPlaceholder').appendChild(loadingMsg);
         
         try {
+            console.log('Loading Pyodide...');
             pyodide = await loadPyodide();
+            console.log('Pyodide loaded successfully');
             
-            // Install ply using micropip
-            await pyodide.loadPackage("micropip");
-            const micropip = pyodide.pyimport("micropip");
-            await micropip.install(['ply']);
+            // Test basic Python execution first
+            console.log('Testing basic Python execution...');
+            pyodide.runPython(`
+                print("Python is working!")
+                x = 1 + 2
+                print(f"1 + 2 = {x}")
+            `);
+            console.log('Basic Python test passed');
             
-            // Load the DCP parser
+            // Skip PLY installation for now and test parser bundle
+            console.log('Testing parser bundle without PLY...');
             await loadDCPParser();
+            console.log('DCP parser loaded successfully');
             
             // Override the AJAX parse function
             overrideParseFunction();
+            console.log('Parse function overridden');
             
             // Remove loading message
             loadingMsg.remove();
@@ -153,16 +162,23 @@
             if (typeof showTreeFromUrl === 'function') {
                 showTreeFromUrl();
             }
+            console.log('Initialization complete');
         } catch (error) {
+            console.error('Initialization error:', error);
             loadingMsg.className = 'alert alert-error';
-            loadingMsg.innerHTML = '<strong>Error!</strong> Failed to initialize: ' + error.message;
+            loadingMsg.innerHTML = '<strong>Error!</strong> Failed to initialize: ' + error.message + '<br><small>Check browser console for details</small>';
         }
     }
     
     async function loadDCPParser() {
-        // Load all parser modules
-        const parserCode = await fetch('static/js/dcp_parser_bundle.py').then(r => r.text());
+        // Load simplified parser (no PLY dependency)
+        console.log('Fetching simple parser...');
+        const parserCode = await fetch('static/js/simple_dcp_parser.py').then(r => r.text());
+        console.log('Parser fetched, size:', parserCode.length, 'characters');
+        
+        console.log('Running parser code in Pyodide...');
         pyodide.runPython(parserCode);
+        console.log('Parser code executed successfully');
     }
     
     function overrideParseFunction() {
@@ -170,25 +186,12 @@
         TreeConstructor.parseObjective = function(objective, success_func, error_func) {
             try {
                 const result = pyodide.runPython(`
-import json
-from dcp_parser.parser import Parser
-from dcp_parser.json.statement_encoder import StatementEncoder
-
-parser = Parser()
 # Add predefined variables and parameters
 for line in ${JSON.stringify(TreeConstants.PREAMBLE)}:
-    parser.parse(line)
+    simple_parser.parse(line)
 
-try:
-    parser.parse('''${objective}''')
-    if len(parser.statements) > 0:
-        expression = parser.statements[-1]
-        json_str = StatementEncoder().encode(expression)
-        json_str
-    else:
-        '{"error": "No valid expression found"}'
-except Exception as e:
-    json.dumps({"error": str(e)})
+# Parse the expression
+parse_dcp_expression('''${objective}''')
                 `);
                 
                 const parsed = JSON.parse(result);
