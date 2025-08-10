@@ -137,17 +137,16 @@
             pyodide = await loadPyodide();
             console.log('Pyodide loaded successfully');
             
-            // Test basic Python execution first
-            console.log('Testing basic Python execution...');
-            pyodide.runPython(`
-                print("Python is working!")
-                x = 1 + 2
-                print(f"1 + 2 = {x}")
-            `);
-            console.log('Basic Python test passed');
+            // Install ply using micropip
+            console.log('Loading micropip...');
+            await pyodide.loadPackage("micropip");
+            console.log('Micropip loaded, installing ply...');
+            const micropip = pyodide.pyimport("micropip");
+            await micropip.install('ply');
+            console.log('PLY installed successfully');
             
-            // Skip PLY installation for now and test parser bundle
-            console.log('Testing parser bundle without PLY...');
+            // Load the full DCP parser
+            console.log('Loading full DCP parser...');
             await loadDCPParser();
             console.log('DCP parser loaded successfully');
             
@@ -171,14 +170,177 @@
     }
     
     async function loadDCPParser() {
-        // Load simplified parser (no PLY dependency)
-        console.log('Fetching simple parser...');
-        const parserCode = await fetch('static/js/simple_dcp_parser.py').then(r => r.text());
-        console.log('Parser fetched, size:', parserCode.length, 'characters');
+        // Create a simpler parser that works with PLY in Pyodide
+        console.log('Creating DCP parser for Pyodide...');
+        pyodide.runPython(`
+import json
+import ply.yacc as yacc
+import ply.lex as lex
+
+# Disable PLY's module validation to work around Pyodide issues
+import ply.lex
+import ply.yacc
+# Monkey-patch to disable problematic validation
+original_validate = ply.lex.LexerReflect.validate_module
+ply.lex.LexerReflect.validate_module = lambda self, module: None
+
+# Token definitions
+tokens = ['ID', 'INT', 'FLOAT', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 
+          'LPAREN', 'RPAREN', 'COMMA', 'EQUALS', 'LEQ', 'GEQ']
+
+# Reserved words
+reserved = {
+    'variable': 'VARIABLE',
+    'parameter': 'PARAMETER', 
+    'positive': 'POSITIVE',
+    'negative': 'NEGATIVE',
+    'zero': 'ZERO',
+    'unknown': 'UNKNOWN'
+}
+
+tokens += list(reserved.values())
+
+# Token rules
+t_PLUS = r'\\+'
+t_MINUS = r'-'
+t_TIMES = r'\\*'
+t_DIVIDE = r'/'
+t_EQUALS = r'=='
+t_LEQ = r'<='
+t_GEQ = r'>='
+t_LPAREN = r'\\('
+t_RPAREN = r'\\)'
+t_COMMA = r','
+t_ignore = ' \\t'
+
+def t_FLOAT(t):
+    r'\\d*\\.\\d+'
+    t.value = float(t.value)
+    return t
+
+def t_INT(t):
+    r'\\d+'
+    t.value = int(t.value)
+    return t
+
+def t_ID(t):
+    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    t.type = reserved.get(t.value, 'ID')
+    return t
+
+def t_newline(t):
+    r'\\n+'
+    t.lexer.lineno += len(t.value)
+
+def t_error(t):
+    print(f"Illegal character '{t.value[0]}'")
+    t.lexer.skip(1)
+
+# Build lexer - provide missing context
+import sys
+if not hasattr(sys.modules['__main__'], '__file__'):
+    sys.modules['__main__'].__file__ = '<interactive>'
+lexer = lex.lex(debug=False)
+
+# Simple expression classes
+class Expression:
+    def __init__(self, name="", op=None):
+        self.name = name
+        self.short_name = name
+        self.op = op
+        self.subexpressions = []
+        self.sign = "unknown"
+        self.curvature = "unknown"
         
-        console.log('Running parser code in Pyodide...');
-        pyodide.runPython(parserCode);
-        console.log('Parser code executed successfully');
+# Function properties
+FUNC_PROPS = {
+    'square': {'curvature': 'convex', 'sign': 'positive'},
+    'sqrt': {'curvature': 'concave', 'sign': 'positive'}, 
+    'abs': {'curvature': 'convex', 'sign': 'positive'},
+    'exp': {'curvature': 'convex', 'sign': 'positive'},
+    'log': {'curvature': 'concave', 'sign': 'unknown'},
+    'max': {'curvature': 'convex', 'sign': 'unknown'},
+    'min': {'curvature': 'concave', 'sign': 'unknown'},
+    'pos': {'curvature': 'convex', 'sign': 'positive'}
+}
+
+# Parser state
+symbols = {}
+statements = []
+
+# Grammar rules
+def p_statement_expr(p):
+    '''statement : expression'''
+    statements.append(p[1])
+
+def p_expression_func(p):
+    '''expression : ID LPAREN expression RPAREN'''
+    expr = Expression(p[1])
+    if p[1] in FUNC_PROPS:
+        expr.curvature = FUNC_PROPS[p[1]]['curvature']
+        expr.sign = FUNC_PROPS[p[1]]['sign']
+    expr.subexpressions = [p[3]]
+    p[0] = expr
+
+def p_expression_binop(p):
+    '''expression : expression PLUS expression
+                 | expression MINUS expression
+                 | expression TIMES expression
+                 | expression DIVIDE expression'''
+    expr = Expression(p[2])
+    expr.subexpressions = [p[1], p[3]]
+    expr.curvature = "affine"
+    p[0] = expr
+
+def p_expression_group(p):
+    '''expression : LPAREN expression RPAREN'''
+    p[0] = p[2]
+
+def p_expression_number(p):
+    '''expression : INT
+                 | FLOAT'''
+    expr = Expression(str(p[1]))
+    expr.curvature = "constant"
+    expr.sign = "positive" if p[1] >= 0 else "negative"
+    p[0] = expr
+
+def p_expression_id(p):
+    '''expression : ID'''
+    expr = Expression(p[1])
+    expr.curvature = "affine"
+    expr.sign = "unknown"
+    p[0] = expr
+
+def p_error(p):
+    if p:
+        raise Exception(f"Syntax error at token {p.type}")
+    else:
+        raise Exception("Syntax error at EOF")
+
+# Build parser - provide the missing context PLY needs
+import sys
+sys.modules['__main__'].__file__ = '<interactive>'
+parser = yacc.yacc(debug=False, write_tables=False)
+
+def parse_expression(text):
+    global statements
+    statements = []
+    try:
+        result = parser.parse(text, lexer=lexer)
+        if statements:
+            expr = statements[-1]
+            return {
+                'name': expr.name,
+                'short_name': expr.short_name, 
+                'sign': expr.sign,
+                'curvature': expr.curvature,
+                'subexpressions': [se.__dict__ if hasattr(se, '__dict__') else str(se) for se in expr.subexpressions]
+            }
+        return {'error': 'No valid expression'}
+    except Exception as e:
+        return {'error': str(e)}
+        `);
+        console.log('DCP parser created successfully');
     }
     
     function overrideParseFunction() {
@@ -186,20 +348,20 @@
         TreeConstructor.parseObjective = function(objective, success_func, error_func) {
             try {
                 const result = pyodide.runPython(`
-# Add predefined variables and parameters
-for line in ${JSON.stringify(TreeConstants.PREAMBLE)}:
-    simple_parser.parse(line)
-
-# Parse the expression
-parse_dcp_expression('''${objective}''')
+import json
+result = parse_expression('''${objective}''')
+json.dumps(result)
                 `);
                 
                 const parsed = JSON.parse(result);
+                console.log('Parse result:', parsed);
                 if (parsed.error) {
+                    console.error('Parse error:', parsed.error);
                     if (error_func) {
                         error_func({responseText: parsed.error}, 'error', parsed.error);
                     }
                 } else {
+                    console.log('Parse success, calling success_func with:', result);
                     if (success_func) success_func(result);
                 }
             } catch (e) {

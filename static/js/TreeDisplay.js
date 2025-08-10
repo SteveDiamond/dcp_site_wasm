@@ -100,17 +100,38 @@ TreeDisplay.createInputBox = function() {
  * Positions the input box over the node with the given id.
  */
 TreeDisplay.positionInputBox = function(id) {
-    var rectElement = $("#"+id)[0].getElementsByTagName('rect')[0];
+    // Safety check - make sure elements exist
+    var element = $("#"+id)[0];
+    if (!element) {
+        console.warn('Element with id', id, 'not found');
+        return;
+    }
+    
+    var rectElements = element.getElementsByTagName('rect');
+    if (rectElements.length === 0) {
+        console.warn('No rect element found in', id);
+        return;
+    }
+    
+    var rectElement = rectElements[0];
     var boundingRect = rectElement.getBoundingClientRect();
+    
     var inputDiv = $("#inputDiv")[0];
-    inputDiv.style.height = boundingRect.height;
-    inputDiv.style.width = boundingRect.width;
-    inputDiv.style.top = boundingRect.top + $(document).scrollTop();
-    inputDiv.style.left = boundingRect.left + $(document).scrollLeft();
+    if (!inputDiv) {
+        console.warn('inputDiv not found, skipping position');
+        return;
+    }
+    
+    inputDiv.style.height = boundingRect.height + 'px';
+    inputDiv.style.width = boundingRect.width + 'px';
+    inputDiv.style.top = (boundingRect.top + $(document).scrollTop()) + 'px';
+    inputDiv.style.left = (boundingRect.left + $(document).scrollLeft()) + 'px';
 
     var inputBox = $("#inputBox")[0];
-    inputBox.style.width = boundingRect.width;
-    inputBox.style.height = TreeConstants.BOX_HEIGHT;
+    if (inputBox) {
+        inputBox.style.width = boundingRect.width + 'px';
+        inputBox.style.height = TreeConstants.BOX_HEIGHT + 'px';
+    }
 }
 
 /**
@@ -159,11 +180,11 @@ TreeDisplay.resetTree = function(id, textElement, text) {
     }
     // Resize input div and box if present.
     if (inputActive) {
-        $("#inputDiv")[0].style.width = newWidth;
+        $("#inputDiv")[0].style.width = newWidth + "px";
         pattern = /[\d\.]+/g;
         var left = parseFloat( pattern.exec($("#inputDiv")[0].style.left) );
         $("#inputDiv")[0].style.left = (left - shift) + "px";
-        $("#inputBox")[0].style.width = newWidth;
+        $("#inputBox")[0].style.width = newWidth + "px";
     }
     // Hide all arrows/groups that overlap with the current group
     // if expanding. Otherwise show them all.
@@ -299,9 +320,18 @@ TreeDisplay.drawLeavesLegend = function(treeWidth) {
  */
 TreeDisplay.drawLeavesBox = function(svg, treeWidth) {
     var text = TreeConstructor.leafLegendText;
+    if (!text || !text.length) {
+        text = TreeConstants.PROMPT_LEAF_LEGEND;
+    }
     textWidths = [];
     for (var i=0; i < text.length; i++) {
-        textWidths.push(text[i].width(TreeConstants.FONT));
+        if (text[i] && typeof text[i].width === 'function') {
+            textWidths.push(text[i].width(TreeConstants.FONT));
+        } else if (typeof text[i] === 'string') {
+            textWidths.push(text[i].width ? text[i].width(TreeConstants.FONT) : 100); // fallback width
+        } else {
+            textWidths.push(100); // fallback width
+        }
     }
     var legendWidth = Math.max.apply(null, textWidths);
     legendWidth += TreeConstants.SHORT_NAME_CONSTANT;
