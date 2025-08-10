@@ -1,43 +1,58 @@
 /**
- * Quiz Module
- * Handles page load for quiz.
+ * Quiz Module - Client-side version
+ * Handles page load for quiz using client-side expression generation
  */
 (function($) {
     // Level constants and variables.
-    rightStreakLength = 0;
-    wrongStreakLength = 0;
-    level = 0;
-    STREAK_TO_LEVEL_UP = 5;
-    STREAK_TO_LEVEL_DOWN = 5;
-    MAX_LEVEL = 2;
-    // Difficulty contants.
-    EASY_KEY = "Easy";
-    MEDIUM_KEY = "Medium";
-    HARD_KEY = "Hard";
-    LEVEL_TO_DIFFICULTY = [EASY_KEY, MEDIUM_KEY, HARD_KEY];
+    let rightStreakLength = 0;
+    let wrongStreakLength = 0;
+    let level = 0;
+    const STREAK_TO_LEVEL_UP = 5;
+    const STREAK_TO_LEVEL_DOWN = 5;
+    const MAX_LEVEL = 2;
+    
+    // Difficulty constants.
+    const EASY_KEY = "Easy";
+    const MEDIUM_KEY = "Medium";
+    const HARD_KEY = "Hard";
+    const LEVEL_TO_DIFFICULTY = [EASY_KEY, MEDIUM_KEY, HARD_KEY];
 
-    DIFFICULTY_MAP = {}
-    DIFFICULTY_MAP[EASY_KEY] = {prob_terminate: 0.05, prob_increase: 20};
-    DIFFICULTY_MAP[MEDIUM_KEY] = {prob_terminate: 0.01, prob_increase: 10};
-    DIFFICULTY_MAP[HARD_KEY] = {prob_terminate: 0.01, prob_increase: 5};
+    const DIFFICULTY_MAP = {
+        [EASY_KEY]: {prob_terminate: 0.05, prob_increase: 20},
+        [MEDIUM_KEY]: {prob_terminate: 0.01, prob_increase: 10},
+        [HARD_KEY]: {prob_terminate: 0.01, prob_increase: 5}
+    };
 
-    EXPRESSION_TYPES = [{convex: true, concave: false, dcp:true},
-                        {convex: false, concave: true, dcp:true},
-                        {convex: false, concave: false, dcp:false},
-                       ];
+    const EXPRESSION_TYPES = [
+        {convex: true, concave: false, dcp:true},
+        {convex: false, concave: true, dcp:true},
+        {convex: false, concave: false, dcp:false},
+    ];
+    
     // Internal curvature name to display name.
-    CURVATURE_DISPLAY_NAME = {"constant": "constant",
-                              "affine": "affine",
-                              "convex": "convex",
-                              "concave": "concave",
-                              "non-convex": "non-DCP"
-                             }
-    CONTINUE_BUTTON = "<button type=\"button\" " +
-                      "id=\"newExpression\" " +
-                      "class=\"btn btn-primary new-expression\">" +
-                      "New Expression</button>";
+    const CURVATURE_DISPLAY_NAME = {
+        "constant": "constant",
+        "affine": "affine",
+        "convex": "convex",
+        "concave": "concave",
+        "non-convex": "non-DCP"
+    };
+    
+    const CONTINUE_BUTTON = "<button type=\"button\" " +
+                          "id=\"newExpression\" " +
+                          "class=\"btn btn-primary new-expression\">" +
+                          "New Expression</button>";
 
-    $().ready(function(){
+    // Global variable to track if we're initialized
+    let quizInitialized = false;
+    
+    // Function to start quiz after Pyodide is ready
+    window.startQuiz = function() {
+        if (quizInitialized) return;
+        quizInitialized = true;
+        
+        console.log('Starting quiz...');
+        
         // Start with answers hidden.
         $(".answers").hide();
         // Nodes in the parse tree cannot be edited.
@@ -47,50 +62,66 @@
         // Listen to the answer buttons.
         $(".answer").click(showParseTree);
         // Listen for change in difficulty.
-        $(window).bind( 'hashchange', setDifficulty);
-    });
+        $(window).bind('hashchange', setDifficulty);
+        
+        console.log('Quiz started successfully');
+    };
 
     // Generate and display a random expression.
     function loadNewExpression() {
-        var difficulty = getDifficulty();
+        console.log('Loading new expression...');
+        const difficulty = getDifficulty();
+        
         // Display the current difficulty.
         displayDifficulty(difficulty);
-        // http://stackoverflow.com/questions/10134237/javascript-random-integer-between-two-numbers
-        var choice = Math.floor(Math.random() * 3);
-        $.ajax({ // create an AJAX call...
-            crossDomain: false,
-                        beforeSend: function(xhr, settings) {
-                            xhr.setRequestHeader("X-CSRFToken", 
-                                                 $.cookie('csrftoken'));
-                        },
-            url: 'new_expr',
-            type: 'POST',
-            data: {
-                true_str: "true",
-                positive: false,
-                negative: false,
-                convex: EXPRESSION_TYPES[choice].convex,
-                concave: EXPRESSION_TYPES[choice].concave,
-                prob_terminate: DIFFICULTY_MAP[difficulty].prob_terminate,
-                prob_increase: DIFFICULTY_MAP[difficulty].prob_increase,
-                dcp: EXPRESSION_TYPES[choice].dcp,
-            },
-            success: function(response) {
-                function fn(root) {
-                    TreeConstructor.setLeafLegendText(root);
-                    $(".alert").alert('close');
-                    // Don't show help for the box with the expression.
-                    TreeConstructor.promptActive = true;
-                    var expression = {name: response};
-                    TreeConstructor.processParseTree(expression);
-                    // Hide the new expression button until the user selects an answer.
-                    $(".new-expression").hide();
-                    $(".answers").show();
-                }
-                // After receiving parse tree, calls fn.
-                TreeConstructor.parseObjective(response, fn);
+        
+        // Choose expression type randomly
+        const choice = Math.floor(Math.random() * 3);
+        const exprType = EXPRESSION_TYPES[choice];
+        const difficultyParams = DIFFICULTY_MAP[difficulty];
+        
+        try {
+            // Generate expression using client-side generator
+            const expression = getRandomExpression(
+                [exprType], 
+                difficultyParams.prob_terminate,
+                difficultyParams.prob_increase,
+                exprType.dcp
+            );
+            
+            console.log('Generated expression:', expression);
+            
+            // Display the expression
+            function displayExpression(root) {
+                TreeConstructor.setLeafLegendText(root);
+                $(".alert").alert('close');
+                // Don't show help for the box with the expression.
+                TreeConstructor.promptActive = true;
+                const expressionNode = {name: expression};
+                TreeConstructor.processParseTree(expressionNode);
+                // Hide the new expression button until the user selects an answer.
+                $(".new-expression").hide();
+                $(".answers").show();
             }
-        });
+            
+            // Parse the expression to display it
+            TreeConstructor.parseObjective(expression, displayExpression);
+            
+        } catch (error) {
+            console.error('Error generating expression:', error);
+            // Fallback to a simple expression
+            const fallbackExpression = "x + y";
+            function displayFallback(root) {
+                TreeConstructor.setLeafLegendText(root);
+                $(".alert").alert('close');
+                TreeConstructor.promptActive = true;
+                const expressionNode = {name: fallbackExpression};
+                TreeConstructor.processParseTree(expressionNode);
+                $(".new-expression").hide();
+                $(".answers").show();
+            }
+            TreeConstructor.parseObjective(fallbackExpression, displayFallback);
+        }
     }
 
     // Get the current difficulty.
@@ -111,11 +142,11 @@
      * specified by the hash and resets level variables.
      */
      function setDifficulty() {
-        var hash = window.location.hash;
+        const hash = window.location.hash;
         if (hash.length > 1) {
-            hash = hash.substr(1);
-            newLevel = LEVEL_TO_DIFFICULTY.indexOf(hash);
-            if (newLevel != -1) {
+            const hashContent = hash.substr(1);
+            const newLevel = LEVEL_TO_DIFFICULTY.indexOf(hashContent);
+            if (newLevel !== -1) {
                 level = newLevel;
                 rightStreakLength = 0;
                 wrongStreakLength = 0;
@@ -132,35 +163,36 @@
         // Hide the answers until the user generates a new expression.
         $(".new-expression").show();
         $(".answers").hide();
-        var expression = $("#"+TreeConstants.ROOT_TAG).text();
+        const expression = $("#"+TreeConstants.ROOT_TAG).text();
         // Show help if active.
         TreeConstructor.promptActive = false;
-        var fn = partial(feedbackForAnswer, this.id);
+        const fn = partial(feedbackForAnswer, this.id);
         TreeConstructor.createParseTree(expression, TreeConstants.ROOT_TAG, fn);
     }
 
     /**
-     * Show error message from the parser.
-     * http://stackoverflow.com/questions/10082330/dynamically-create-bootstrap-alerts-box-through-javascript
+     * Show feedback for the user's answer
      * answer - the user's answer.
      */
     function feedbackForAnswer(answer) {
-        var curvature = TreeConstructor.root.curvature;
-        var suffix = ". " + CONTINUE_BUTTON;
-        if (curvature == answer) {
-            var message = "The expression is " + 
+        const curvature = TreeConstructor.root.curvature;
+        const suffix = ". " + CONTINUE_BUTTON;
+        
+        if (curvature === answer) {
+            const message = "The expression is " + 
                           CURVATURE_DISPLAY_NAME[curvature] + suffix;
             $(TreeConstants.ERROR_DIV).html('<div class="alert alert-success">' +
-            '<span><strong>Correct!</strong> ' + message + '</span></div>')
+            '<span><strong>Correct!</strong> ' + message + '</span></div>');
         } else {
-            var message = "The expression is " + CURVATURE_DISPLAY_NAME[curvature] + 
+            const message = "The expression is " + CURVATURE_DISPLAY_NAME[curvature] + 
                           ", but you answered " + CURVATURE_DISPLAY_NAME[answer] +
                            suffix;
             $(TreeConstants.ERROR_DIV).html('<div class="alert alert-error">' +
-            '<span><strong>Incorrect!</strong> ' + message + '</span></div>')
+            '<span><strong>Incorrect!</strong> ' + message + '</span></div>');
         }
+        
         // Increase/decrease difficulty
-        updateLevel(curvature == answer);
+        updateLevel(curvature === answer);
         // Listen to new expression button.
         $("#newExpression").click(loadNewExpression);
     }
@@ -181,7 +213,7 @@
         // Increase/decrease difficulty based on performance.
         if (rightStreakLength >= STREAK_TO_LEVEL_UP) {
             rightStreakLength = 0;
-            level = Math.min(level + 1, MAX_LEVEL)
+            level = Math.min(level + 1, MAX_LEVEL);
         } else if (wrongStreakLength >= STREAK_TO_LEVEL_DOWN) {
             wrongStreakLength = 0;
             level = Math.max(level - 1, 0);
@@ -191,9 +223,10 @@
     // Utility function to call functions with some arguments supplied.
     // http://stackoverflow.com/questions/321113/how-can-i-pre-set-arguments-in-javascript-function-call-partial-function-appli
     function partial(func /*, 0..n args */) {
-        var args = Array.prototype.slice.call(arguments, 1);
+        const args = Array.prototype.slice.call(arguments, 1);
         return function() {
             return func.apply(this, args);
         };
     }
-}(jQuery))
+    
+})(jQuery);
