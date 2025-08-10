@@ -1,4 +1,4 @@
-from dcp_violation import DCPViolation
+from dcp_parser.error_messages.dcp_violation import DCPViolation
 
 class ConstraintError(DCPViolation):
     """ Represents a DCP violation through an improper constraint."""

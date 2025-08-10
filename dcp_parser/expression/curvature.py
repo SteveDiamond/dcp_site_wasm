@@ -1,4 +1,4 @@
-from sign import Sign
+from dcp_parser.expression.sign import Sign
 
 class Curvature(object):
     """ Curvature for a convex optimization expression. """

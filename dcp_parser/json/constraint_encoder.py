@@ -1,7 +1,7 @@
 import json
-import settings as s
+from dcp_parser.json import settings as s
 from dcp_parser.expression.constraints import Constraint, EqConstraint, LeqConstraint, GeqConstraint
-from expression_encoder import ExpressionEncoder
+from dcp_parser.json.expression_encoder import ExpressionEncoder
 # Taken from http://docs.python.org/2/library/json.html
 
 class ConstraintEncoder(json.JSONEncoder):

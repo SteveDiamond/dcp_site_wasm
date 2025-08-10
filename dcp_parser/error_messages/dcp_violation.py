@@ -2,7 +2,7 @@ import abc
 from dcp_parser.expression.curvature import Curvature
 from dcp_parser.expression.sign import Sign
 from dcp_parser.atomic.monotonicity import Monotonicity
-import settings
+from dcp_parser.error_messages import settings
 
 class DCPViolation(object):
     """ Abstract base class for DCP Violations. """

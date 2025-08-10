@@ -1,5 +1,5 @@
 import json
-import settings as s
+from dcp_parser.json import settings as s
 from dcp_parser.expression.expression import Expression
 # Taken from http://docs.python.org/2/library/json.html
 

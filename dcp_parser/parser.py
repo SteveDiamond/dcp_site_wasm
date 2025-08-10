@@ -1,6 +1,6 @@
-from expression.statement import Statement
-from expression.expression import Parameter, Variable, Constant
-from expression.sign import Sign
+from dcp_parser.expression.statement import Statement
+from dcp_parser.expression.expression import Parameter, Variable, Constant
+from dcp_parser.expression.sign import Sign
 import dcp_parser.atomic.atom_loader as atom_loader
 import ply.yacc
 

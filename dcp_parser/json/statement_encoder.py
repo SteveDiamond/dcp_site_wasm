@@ -1,9 +1,9 @@
 import json
-import settings as s
+from dcp_parser.json import settings as s
 from dcp_parser.expression.expression import Expression
 from dcp_parser.expression.constraints import Constraint
-from constraint_encoder import ConstraintEncoder
-from expression_encoder import ExpressionEncoder
+from dcp_parser.json.constraint_encoder import ConstraintEncoder
+from dcp_parser.json.expression_encoder import ExpressionEncoder
 # Taken from http://docs.python.org/2/library/json.html
 
 class StatementEncoder(json.JSONEncoder):

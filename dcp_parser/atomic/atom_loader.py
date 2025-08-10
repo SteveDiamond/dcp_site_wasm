@@ -1,5 +1,5 @@
 from dcp_parser.expression.expression import Expression
-from atoms import Atom
+from dcp_parser.atomic.atoms import Atom
 from dcp_parser.error_messages.dcp_violation_factory import DCPViolationFactory
 # Methods to create a dict of atomic functions
 

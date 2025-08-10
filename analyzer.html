@@ -1,94 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="utf-8">
-    <title>DCP Analyzer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
+  <title>DCP Analyzer</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <!-- Bootstrap and jQuery + plugins -->
+  <script src="static/jquery-1.9.1.min.js"></script>
+  <script src="static/jquery.cookie.js"></script>
+  <script src="static/bootstrap/js/bootstrap.min.js"></script>
+  <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 
-    <!-- Le styles -->
-    <link href="static/dcp_sandbox/bootstrap/css/bootstrap.css" rel="stylesheet">
-    <link href="static/dcp_sandbox/css/treeInteraction.css" rel="stylesheet">
-    <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-      .tree-div {
-        border-width: 4px;
-        border-style: solid;
-        border-color: #ddd;
-      }
-    </style>
-    <link href="static/dcp_sandbox/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+  <!-- D3.js -->
+  <script type="text/javascript" src="static/d3.v3/d3.v3.min.js"></script>
 
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="static/dcp_sandbox/bootstrap/js/html5shiv.js"></script>
-    <![endif]-->
+  <!-- Site wide js and CSS -->
+  <link href="static/css/treeInteraction.css" rel="stylesheet">
+  <script type="text/javascript" src="static/js/base.js"></script>
+  
+  <!-- Tree visualization scripts -->
+  <script src="static/js/TreeConstants.js"></script>
+  <script src="static/js/TreeConstructor.js"></script>
+  <script src="static/js/TreeDisplay.js"></script>
+  <script src="static/js/TreeLayout.js"></script>
+  <script src="static/js/treeInteraction.js"></script>
+  <script src="static/js/analyzer.js"></script>
 
-    <!-- Fav and touch icons -->
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="static/dcp_sandbox/bootstrap/img/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="static/dcp_sandbox/bootstrap/img/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="static/dcp_sandbox/bootstrap/img/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="static/dcp_sandbox/bootstrap/img/apple-touch-icon-57-precomposed.png">
-    <link rel="shortcut icon" href="static/dcp_sandbox/images/convex.ico">
-  </head>
+  <!-- Pyodide for client-side Python -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 
-  <body>
+  <!-- Thumbnail -->
+  <link rel="shortcut icon" href="static/images/convex.ico" />
+</head>
+<body>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <ul class="nav">
+        <!-- Button to trigger feedback modal -->
+        <li>
+          <div>
+            <a role="button" class="btn btn-primary nav-leftmost" data-toggle="modal" data-target="#feedback">Feedback</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
 
-    <!-- Navigation -->
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="brand" href="/">DCP</a>
-          <div class="nav-collapse collapse">
-            <ul class="nav">
-              <li><a href="/">Home</a></li>
-              <li><a href="/rules">Rules</a></li>
-              <li><a href="/functions">Functions</a></li>
-              <li class="active"><a href="/analyzer">Analyzer</a></li>
-              <li><a href="/quiz">Quiz</a></li>
-            </ul>
-          </div><!--/.nav-collapse -->
+  <div class="container-fluid below-nav">
+    <div class="row-fluid">
+      <nav>
+        <ul class="nav nav-pills nav-stacked span1">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="rules.html">Rules</a></li>
+          <li><a href="functions.html">Functions</a></li>
+          <li class="active"><a href="analyzer.html">Analyzer</a></li>
+          <li><a href="quiz.html">Quiz</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      
+      <div class="span10">
+        <!-- Error placeholder for initialization messages -->
+        <div id="errorPlaceholder"></div>
+        
+        <!-- Main content from base page -->
+        <div class="row tree-div">
+          <div class="span12" id="tree"></div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="container">
-      <!-- Error placeholder for initialization messages -->
-      <div id="errorPlaceholder"></div>
-      
-      <!-- Main content from base page -->
-      <div class="row tree-div">
-        <div class="span12" id="tree"></div>
-      </div>
-
-    </div> <!-- /container -->
-
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="static/dcp_sandbox/jquery-1.9.1.min.js"></script>
-    <script src="static/dcp_sandbox/bootstrap/js/bootstrap.min.js"></script>
-    <script src="static/dcp_sandbox/d3.v3/d3.v3.js"></script>
-    <script src="static/dcp_sandbox/js/TreeConstants.js"></script>
-    <script src="static/dcp_sandbox/js/TreeConstructor.js"></script>
-    <script src="static/dcp_sandbox/js/TreeDisplay.js"></script>
-    <script src="static/dcp_sandbox/js/base.js"></script>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+  <!-- Feedback Modal -->
+  <div id="feedback" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="feedbackLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h4 id="feedbackLabel">Let us know how to improve the site!</h4>
+    </div>
+    <div class="modal-body">
+      <textarea class="feedback" rows="10"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button class="btn btn-primary feedback" data-dismiss="modal">Send Feedback</button>
+    </div>
+  </div>
 
     <script>
         // Initialize Pyodide and load the original DCP parser
         let pyodide = null;
         
         // Update TreeConstants for client-side paths
-        TreeConstants.IMAGE_PREFIX = "static/dcp_sandbox/images/";
+        TreeConstants.IMAGE_PREFIX = "static/images/";
         TreeConstants.PREAMBLE = [
             'variable x y z u v w',
             'parameter a b c',
@@ -246,6 +247,9 @@ def parse_expression_with_dcp(text):
                 overrideParseFunction();
                 console.log('Parse function overridden');
                 console.log('Initialization complete');
+                
+                // Show the initial prompt tree
+                showTreeFromUrl();
                 
             } catch (error) {
                 console.error('Failed to initialize:', error);

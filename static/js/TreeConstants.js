@@ -32,9 +32,9 @@ TreeConstants.SVG_IMAGE_SUFFIX = navigator.userAgent.indexOf("Firefox") == -1 ? 
 TreeConstants.LEFT_SYMBOL = "left";
 TreeConstants.RIGHT_SYMBOL = "right";
 // Tree location
-TreeConstants.TREE_DIV = "#chart";
+TreeConstants.TREE_DIV = "#tree";
 // Location of images
-TreeConstants.IMAGE_PREFIX = "/static/dcp_sandbox/images/";
+TreeConstants.IMAGE_PREFIX = "static/images/";
 // Key for tagToNode map in cookie
 TreeConstants.TAG_TO_NODE = "tagToNode";
 // Constants for reconstructing objective/constraint

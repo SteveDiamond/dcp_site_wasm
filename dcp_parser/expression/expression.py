@@ -1,13 +1,17 @@
 # from utils import error_msg, id_wrapper, \
 #     isunknown, ispositive, isnegative, \
 #     isaff, iscvx, isccv, ismatrix, isscalar, isvector   
-import settings
-from sign import Sign
-from curvature import Curvature
-from sys import maxint
+from dcp_parser.expression import settings
+from dcp_parser.expression.sign import Sign
+from dcp_parser.expression.curvature import Curvature
+import sys
+try:
+    maxint = sys.maxint  # Python 2
+except AttributeError:
+    maxint = sys.maxsize  # Python 3
 from numbers import Number
-from statement import Statement
-from constraints import EqConstraint, GeqConstraint, LeqConstraint
+from dcp_parser.expression.statement import Statement
+from dcp_parser.expression.constraints import EqConstraint, GeqConstraint, LeqConstraint
 from dcp_parser.error_messages.dcp_violation_factory import DCPViolationFactory
 
 class Expression(Statement):

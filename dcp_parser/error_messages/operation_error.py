@@ -1,5 +1,5 @@
 import dcp_parser.expression.settings as EXP_SET
-from dcp_violation import DCPViolation
+from dcp_parser.error_messages.dcp_violation import DCPViolation
 from dcp_parser.expression.curvature import Curvature
 from dcp_parser.expression.sign import Sign
 

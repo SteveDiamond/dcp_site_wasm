@@ -1,9 +1,9 @@
 from dcp_parser.expression.curvature import Curvature
 from dcp_parser.expression.sign import Sign
 from dcp_parser.atomic.monotonicity import Monotonicity
-from operation_error import OperationError
-from composition_error import CompositionError
-from constraint_error import ConstraintError
+from dcp_parser.error_messages.operation_error import OperationError
+from dcp_parser.error_messages.composition_error import CompositionError
+from dcp_parser.error_messages.constraint_error import ConstraintError
 
 class DCPViolationFactory(object):
     """ Factory class for OperationError and CompositionError. """

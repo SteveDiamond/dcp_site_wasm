@@ -1,6 +1,6 @@
 import abc
-from curvature import Curvature
-from statement import Statement
+from dcp_parser.expression.curvature import Curvature
+from dcp_parser.expression.statement import Statement
 from dcp_parser.error_messages.dcp_violation_factory import DCPViolationFactory
 
 class Constraint(Statement):
