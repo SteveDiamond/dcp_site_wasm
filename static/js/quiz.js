@@ -48,7 +48,11 @@
     
     // Function to start quiz after Pyodide is ready
     window.startQuiz = function() {
-        if (quizInitialized) return;
+        console.log('startQuiz called, quizInitialized:', quizInitialized);
+        if (quizInitialized) {
+            console.log('Quiz already initialized, returning');
+            return;
+        }
         quizInitialized = true;
         
         console.log('Starting quiz...');
@@ -64,14 +68,19 @@
         // Listen for change in difficulty.
         $(window).bind('hashchange', setDifficulty);
         // Set up event delegation for "New Expression" button (created dynamically)
-        $(document).on('click', '#newExpression', loadNewExpression);
+        $(document).on('click', '#newExpression', function(e) {
+            console.log('New Expression button clicked');
+            e.preventDefault();
+            loadNewExpression();
+        });
         
         console.log('Quiz started successfully');
     };
 
     // Generate and display a random expression.
     function loadNewExpression() {
-        console.log('Loading new expression...');
+        console.log('loadNewExpression called');
+        console.log('window.pyodideReady:', window.pyodideReady);
         
         // Check if Pyodide is ready
         if (!window.pyodideReady) {
@@ -79,6 +88,8 @@
             setTimeout(loadNewExpression, 500);  // Try again in 500ms
             return;
         }
+        
+        console.log('Pyodide is ready, proceeding with expression generation...');
         
         const difficulty = getDifficulty();
         
@@ -103,19 +114,26 @@
             
             // Display the expression
             function displayExpression(root) {
+                console.log('displayExpression called with root:', root);
                 TreeConstructor.setLeafLegendText(root);
                 $(".alert").alert('close');
                 // Don't show help for the box with the expression.
                 TreeConstructor.promptActive = true;
                 const expressionNode = {name: expression};
+                console.log('About to call processParseTree with:', expressionNode);
                 TreeConstructor.processParseTree(expressionNode);
+                console.log('processParseTree completed');
                 // Hide the new expression button until the user selects an answer.
                 $(".new-expression").hide();
                 $(".answers").show();
+                console.log('UI updated - answers shown, new expression button hidden');
             }
             
             // Parse the expression to display it
-            TreeConstructor.parseObjective(expression, displayExpression);
+            console.log('About to parse expression:', expression);
+            TreeConstructor.parseObjective(expression, displayExpression, function(error) {
+                console.error('Error parsing expression:', error);
+            });
             
         } catch (error) {
             console.error('Error generating expression:', error);

@@ -98,6 +98,9 @@ class Curvature(object):
             return self + other
         else:
             return Curvature.NONCONVEX
+    
+    # Python 3 compatibility
+    __truediv__ = __div__
         
     def __neg__(self):
         return self.sign_mult(Sign.NEGATIVE)

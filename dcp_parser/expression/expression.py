@@ -125,10 +125,16 @@ class Expression(Statement):
         exp.sign_by_curvature()
         exp.errors = DCPViolationFactory.operation_error(settings.DIV, self, other, exp)
         return exp
+    
+    # Python 3 compatibility
+    __truediv__ = __div__
 
     # Called if var / Expression not implemented, with arguments reversed.
     def __rdiv__(self, other):
         return Expression.type_check(other) / self
+    
+    # Python 3 compatibility
+    __rtruediv__ = __rdiv__
         
     def __neg__(self):
         self = Expression.type_check(self)

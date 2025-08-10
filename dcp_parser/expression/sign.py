@@ -54,6 +54,9 @@ class Sign(object):
             raise Exception("Divide by zero error.")
         else:
             return self * other
+    
+    # Python 3 compatibility
+    __truediv__ = __div__
         
     def __neg__(self):
         return self * Sign.NEGATIVE
