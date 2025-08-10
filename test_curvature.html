@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Curvature Logic Test</title>
+    <script src="static/js/quiz-operators.js"></script>
+    <script src="static/js/quiz-generator.js"></script>
+</head>
+<body>
+    <h1>Curvature Logic Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Test the filtering logic
+        function testFiltering() {
+            const results = [];
+            
+            // Test cases matching Django quiz.js
+            const testCases = [
+                {name: "Convex", convex: true, concave: false, dcp: true},
+                {name: "Concave", convex: false, concave: true, dcp: true}, 
+                {name: "Non-DCP", convex: false, concave: false, dcp: false}
+            ];
+            
+            testCases.forEach(testCase => {
+                results.push(`<h2>${testCase.name} Expression Test</h2>`);
+                
+                // Count available operators for this case
+                let terminalCount = 0;
+                let nonTerminalCount = 0;
+                
+                [true, false].forEach(terminal => {
+                    const filtered = QUIZ_OPERATORS.filter(op => {
+                        const terminalMatch = (op.terminal === terminal);
+                        const convexMatch = (op.convex === testCase.convex) || (op.convex === true);
+                        const concaveMatch = (op.concave === testCase.concave) || (op.concave === true);
+                        const positiveMatch = (op.positive === false) || (op.positive === true);  
+                        const negativeMatch = (op.negative === false) || (op.negative === true);
+                        
+                        return terminalMatch && convexMatch && concaveMatch && positiveMatch && negativeMatch;
+                    });
+                    
+                    if (terminal) {
+                        terminalCount = filtered.length;
+                        results.push(`<p>Terminal operators: ${terminalCount}</p>`);
+                        results.push(`<ul>`);
+                        filtered.forEach(op => {
+                            results.push(`<li>${op.prefix}${op.suffix} (convex:${op.convex}, concave:${op.concave})</li>`);
+                        });
+                        results.push(`</ul>`);
+                    } else {
+                        nonTerminalCount = filtered.length;
+                        results.push(`<p>Non-terminal operators: ${nonTerminalCount}</p>`);
+                        results.push(`<ul>`);
+                        filtered.forEach(op => {
+                            results.push(`<li>${op.prefix}${op.infix || ''}${op.suffix} (convex:${op.convex}, concave:${op.concave})</li>`);
+                        });
+                        results.push(`</ul>`);
+                    }
+                });
+            });
+            
+            // Generate test expressions
+            results.push(`<h2>Sample Generated Expressions</h2>`);
+            testCases.forEach(testCase => {
+                results.push(`<h3>${testCase.name}</h3>`);
+                for (let i = 0; i < 5; i++) {
+                    try {
+                        const expr = getRandomExpression([testCase], 0.3, 10, testCase.dcp);
+                        results.push(`<p>${expr}</p>`);
+                    } catch (e) {
+                        results.push(`<p>Error: ${e.message}</p>`);
+                    }
+                }
+            });
+            
+            document.getElementById('results').innerHTML = results.join('\n');
+        }
+        
+        // Run test when page loads
+        testFiltering();
+    </script>
+</body>
+</html>

@@ -1,426 +1,294 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>DCP Analyzer</title>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-  <!-- Bootstrap and jQuery + plugins -->
-  <script src="static/jquery-1.9.1.min.js"></script>
-  <script src="static/jquery.cookie.js"></script>
-  <script src="static/bootstrap/js/bootstrap.min.js"></script>
-  <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <meta charset="utf-8">
+    <title>DCP Analyzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-  <!-- D3.js -->
-  <script type="text/javascript" src="static/d3.v3/d3.v3.min.js"></script>
+    <!-- Le styles -->
+    <link href="static/dcp_sandbox/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="static/dcp_sandbox/css/treeInteraction.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+      .tree-div {
+        border-width: 4px;
+        border-style: solid;
+        border-color: #ddd;
+      }
+    </style>
+    <link href="static/dcp_sandbox/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 
-  <!-- MathJax -->
-  <script type="text/javascript"
-    src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-  </script>
-  <script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
-  });
-  </script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="static/dcp_sandbox/bootstrap/js/html5shiv.js"></script>
+    <![endif]-->
 
-  <!-- Site wide js and CSS -->
-  <link href="static/css/treeInteraction.css" rel="stylesheet">
-  <script type="text/javascript" src="static/js/base.js"></script>
-  
-  <!-- Tree visualization scripts -->
-  <script src="static/js/TreeConstants.js"></script>
-  <script src="static/js/TreeConstructor.js"></script>
-  <script src="static/js/TreeLayout.js"></script>
-  <script src="static/js/TreeDisplay.js"></script>
-  <script src="static/js/treeInteraction.js"></script>
-  <script src="static/js/analyzer.js"></script>
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="static/dcp_sandbox/bootstrap/img/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="static/dcp_sandbox/bootstrap/img/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="static/dcp_sandbox/bootstrap/img/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="static/dcp_sandbox/bootstrap/img/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="static/dcp_sandbox/images/convex.ico">
+  </head>
 
-  <!-- Pyodide for client-side Python -->
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+  <body>
 
-  <!-- Thumbnail -->
-  <link rel="shortcut icon" href="static/images/convex.ico" />
-</head>
-<body>
-  <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
-      <ul class="nav">
-        <!-- Button to trigger feedback modal -->
-        <li>
-          <div>
-            <a role="button" class="btn btn-primary nav-leftmost" data-toggle="modal" data-target="#feedback">Feedback</a>
-          </div>
-        </li>
-        <li class="divider-vertical"></li>
-        <li>
-          <div><a href="#instructions" role="button" class="btn btn-primary" data-toggle="modal">Help</a></div>
-        </li>
-        <li class="divider-vertical"></li>
-        <li>
-          <button type="button" id="help" class="btn btn-primary">Hide Legends</button>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="container-fluid below-nav">
-    <div class="row-fluid">
-      <nav>
-        <ul class="nav nav-pills nav-stacked span1">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="rules.html">Rules</a></li>
-          <li><a href="functions.html">Functions</a></li>
-          <li class="active"><a href="analyzer.html">Analyzer</a></li>
-          <li><a href="quiz.html">Quiz</a></li>
-          <li><a href="about.html">About</a></li>
-        </ul>
-      </nav>
-      <div class="span11">
-        <div id="errorPlaceholder"></div>
-        <input type="hidden" id="csrf_token" value="dummy">
-        <!--Body content-->
-        <div id="chart"></div>
+    <!-- Navigation -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="/">DCP</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li><a href="/">Home</a></li>
+              <li><a href="/rules">Rules</a></li>
+              <li><a href="/functions">Functions</a></li>
+              <li class="active"><a href="/analyzer">Analyzer</a></li>
+              <li><a href="/quiz">Quiz</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Feedback Modal -->
-  <div id="feedback" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="feedbackLabel" aria-hidden="true">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h4 id="feedbackLabel">Let us know how to improve the site!</h4>
-    </div>
-    <div class="modal-body">
-      <textarea class="feedback" rows="10"></textarea>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-      <button class="btn btn-primary feedback" data-dismiss="modal">Send Feedback</button>
-    </div>
-  </div>
+    <div class="container">
+      <!-- Error placeholder for initialization messages -->
+      <div id="errorPlaceholder"></div>
+      
+      <!-- Main content from base page -->
+      <div class="row tree-div">
+        <div class="span12" id="tree"></div>
+      </div>
 
-  <!-- Instructions Modal -->
-  <div id="instructions" class="modal fade">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title">Instructions</h4>
-        </div>
-        <div class="modal-body">
-          <p>Follow the prompt in the box to see DCP analysis visualized as a tree. To modify the tree, click on any box containing an expression and edit the text.</p>
-        </div>
-      </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-  </div><!-- /.modal -->
+    </div> <!-- /container -->
 
-  <script>
-    // Initialize Pyodide and override the parse endpoint
-    let pyodide = null;
-    
-    // Update TreeConstants for client-side paths
-    TreeConstants.IMAGE_PREFIX = "static/images/";
-    TreeConstants.PREAMBLE = [
-      'variable x y z u v w',
-      'parameter a b c',
-      'parameter positive d e f'
-    ];
-    
-    async function initPyodide() {
-        // Show loading message
-        const loadingMsg = document.createElement('div');
-        loadingMsg.className = 'alert alert-info';
-        loadingMsg.innerHTML = '<strong>Loading...</strong> Initializing Python environment for DCP analysis...';
-        document.getElementById('errorPlaceholder').appendChild(loadingMsg);
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="static/dcp_sandbox/jquery-1.9.1.min.js"></script>
+    <script src="static/dcp_sandbox/bootstrap/js/bootstrap.min.js"></script>
+    <script src="static/dcp_sandbox/d3.v3/d3.v3.js"></script>
+    <script src="static/dcp_sandbox/js/TreeConstants.js"></script>
+    <script src="static/dcp_sandbox/js/TreeConstructor.js"></script>
+    <script src="static/dcp_sandbox/js/TreeDisplay.js"></script>
+    <script src="static/dcp_sandbox/js/base.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+
+    <script>
+        // Initialize Pyodide and load the original DCP parser
+        let pyodide = null;
         
-        try {
-            console.log('Loading Pyodide...');
-            pyodide = await loadPyodide();
-            console.log('Pyodide loaded successfully');
-            
-            // Install ply using micropip
-            console.log('Loading micropip...');
-            await pyodide.loadPackage("micropip");
-            console.log('Micropip loaded, installing ply...');
-            const micropip = pyodide.pyimport("micropip");
-            await micropip.install('ply');
-            console.log('PLY installed successfully');
-            
-            // Load the full DCP parser
-            console.log('Loading full DCP parser...');
-            await loadDCPParser();
-            console.log('DCP parser loaded successfully');
-            
-            // Override the AJAX parse function
-            overrideParseFunction();
-            console.log('Parse function overridden');
-            
-            // Remove loading message
-            loadingMsg.remove();
-            
-            // Show tree if expression in URL, but only after Pyodide is ready
-            if (typeof showTreeFromUrl === 'function') {
-                showTreeFromUrl();
-            }
-            console.log('Initialization complete');
-        } catch (error) {
-            console.error('Initialization error:', error);
-            loadingMsg.className = 'alert alert-error';
-            loadingMsg.innerHTML = '<strong>Error!</strong> Failed to initialize: ' + error.message + '<br><small>Check browser console for details</small>';
-        }
-    }
-    
-    async function loadDCPParser() {
-        // Create a simpler parser that works with PLY in Pyodide
-        console.log('Creating DCP parser for Pyodide...');
-        pyodide.runPython(`
-import json
-import ply.yacc as yacc
-import ply.lex as lex
-
-# Disable PLY's module validation to work around Pyodide issues
-import ply.lex
-import ply.yacc
-# Monkey-patch to disable problematic validation
-original_validate = ply.lex.LexerReflect.validate_module
-ply.lex.LexerReflect.validate_module = lambda self, module: None
-
-# Token definitions
-tokens = ['ID', 'INT', 'FLOAT', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 
-          'LPAREN', 'RPAREN', 'COMMA', 'EQUALS', 'LEQ', 'GEQ']
-
-# Reserved words
-reserved = {
-    'variable': 'VARIABLE',
-    'parameter': 'PARAMETER', 
-    'positive': 'POSITIVE',
-    'negative': 'NEGATIVE',
-    'zero': 'ZERO',
-    'unknown': 'UNKNOWN'
-}
-
-tokens += list(reserved.values())
-
-# Token rules
-t_PLUS = r'\\+'
-t_MINUS = r'-'
-t_TIMES = r'\\*'
-t_DIVIDE = r'/'
-t_EQUALS = r'=='
-t_LEQ = r'<='
-t_GEQ = r'>='
-t_LPAREN = r'\\('
-t_RPAREN = r'\\)'
-t_COMMA = r','
-t_ignore = ' \\t'
-
-def t_FLOAT(t):
-    r'\\d*\\.\\d+'
-    t.value = float(t.value)
-    return t
-
-def t_INT(t):
-    r'\\d+'
-    t.value = int(t.value)
-    return t
-
-def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = reserved.get(t.value, 'ID')
-    return t
-
-def t_newline(t):
-    r'\\n+'
-    t.lexer.lineno += len(t.value)
-
-def t_error(t):
-    print(f"Illegal character '{t.value[0]}'")
-    t.lexer.skip(1)
-
-# Build lexer - provide missing context
-import sys
-if not hasattr(sys.modules['__main__'], '__file__'):
-    sys.modules['__main__'].__file__ = '<interactive>'
-lexer = lex.lex(debug=False)
-
-# Simple expression classes
-class Expression:
-    def __init__(self, name="", op=None):
-        self.name = name
-        self.short_name = name
-        self.op = op
-        self.subexpressions = []
-        self.sign = "unknown"
-        self.curvature = "unknown"
+        // Update TreeConstants for client-side paths
+        TreeConstants.IMAGE_PREFIX = "static/dcp_sandbox/images/";
+        TreeConstants.PREAMBLE = [
+            'variable x y z u v w',
+            'parameter a b c',
+            'parameter positive d e f'
+        ];
         
-# Function properties
-FUNC_PROPS = {
-    'square': {'curvature': 'convex', 'sign': 'positive'},
-    'sqrt': {'curvature': 'concave', 'sign': 'positive'}, 
-    'abs': {'curvature': 'convex', 'sign': 'positive'},
-    'exp': {'curvature': 'convex', 'sign': 'positive'},
-    'log': {'curvature': 'concave', 'sign': 'unknown'},
-    'max': {'curvature': 'convex', 'sign': 'unknown'},
-    'min': {'curvature': 'concave', 'sign': 'unknown'},
-    'pos': {'curvature': 'convex', 'sign': 'positive'},
-    'geo_mean': {'curvature': 'concave', 'sign': 'positive'},
-    'log_sum_exp': {'curvature': 'convex', 'sign': 'unknown'},
-    'norm1': {'curvature': 'convex', 'sign': 'positive'},
-    'norm2': {'curvature': 'convex', 'sign': 'positive'},
-    'norm_inf': {'curvature': 'convex', 'sign': 'positive'},
-    'quad_over_lin': {'curvature': 'convex', 'sign': 'positive'},
-    'huber': {'curvature': 'convex', 'sign': 'positive'},
-    'entr': {'curvature': 'concave', 'sign': 'unknown'},
-    'inv_pos': {'curvature': 'convex', 'sign': 'positive'},
-    'kl_div': {'curvature': 'convex', 'sign': 'positive'}
-}
-
-# Parser state
-symbols = {}
-statements = []
-
-# Grammar rules
-def p_statement_expr(p):
-    '''statement : expression'''
-    statements.append(p[1])
-
-def p_expression_func(p):
-    '''expression : ID LPAREN expression RPAREN
-                 | ID LPAREN expression_list RPAREN'''
-    expr = Expression(p[1])
-    if p[1] in FUNC_PROPS:
-        expr.curvature = FUNC_PROPS[p[1]]['curvature']
-        expr.sign = FUNC_PROPS[p[1]]['sign']
-    
-    # Check if p[3] is a list (from expression_list) or single expression
-    if isinstance(p[3], list):  # Multiple arguments from expression_list
-        expr.subexpressions = p[3]
-    else:  # Single expression
-        expr.subexpressions = [p[3]]
-    p[0] = expr
-
-def p_expression_list(p):
-    '''expression_list : expression
-                      | expression_list COMMA expression'''
-    if len(p) == 2:  # Single expression
-        p[0] = [p[1]]
-    else:  # expression_list COMMA expression
-        p[1].append(p[3])
-        p[0] = p[1]
-
-def p_expression_binop(p):
-    '''expression : expression PLUS expression
-                 | expression MINUS expression
-                 | expression TIMES expression
-                 | expression DIVIDE expression'''
-    expr = Expression(p[2])
-    expr.subexpressions = [p[1], p[3]]
-    expr.curvature = "affine"
-    p[0] = expr
-
-def p_expression_group(p):
-    '''expression : LPAREN expression RPAREN'''
-    p[0] = p[2]
-
-def p_expression_number(p):
-    '''expression : INT
-                 | FLOAT'''
-    expr = Expression(str(p[1]))
-    expr.curvature = "constant"
-    expr.sign = "positive" if p[1] >= 0 else "negative"
-    p[0] = expr
-
-def p_expression_id(p):
-    '''expression : ID'''
-    expr = Expression(p[1])
-    expr.curvature = "affine"
-    expr.sign = "unknown"
-    p[0] = expr
-
-def p_error(p):
-    if p:
-        raise Exception(f"Syntax error at token {p.type}")
-    else:
-        raise Exception("Syntax error at EOF")
-
-# Build parser - provide the missing context PLY needs
-import sys
-sys.modules['__main__'].__file__ = '<interactive>'
-parser = yacc.yacc(debug=False, write_tables=False)
-
-def convert_to_dict(expr):
-    """Convert expression to dict format expected by tree visualization"""
-    if isinstance(expr, Expression):
-        children = [convert_to_dict(se) for se in expr.subexpressions] if expr.subexpressions else None
-        result = {
-            'name': expr.name,
-            'short_name': expr.short_name,
-            'sign': expr.sign,
-            'curvature': expr.curvature
-        }
-        if children:
-            result['children'] = children
-        return result
-    else:
-        return str(expr)
-
-def parse_expression(text):
-    global statements
-    statements = []
-    try:
-        result = parser.parse(text, lexer=lexer)
-        if statements:
-            expr = statements[-1]
-            return convert_to_dict(expr)
-        return {'error': 'No valid expression'}
-    except Exception as e:
-        return {'error': str(e)}
-        `);
-        console.log('DCP parser created successfully');
-    }
-    
-    function overrideParseFunction() {
-        // Override TreeConstructor.parseObjective to use Pyodide instead of server
-        TreeConstructor.parseObjective = function(objective, success_func, error_func) {
+        async function initPyodide() {
+            // Show loading message
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'alert alert-info';
+            loadingMsg.innerHTML = '<strong>Loading...</strong> Initializing Python environment for DCP analysis...';
+            document.getElementById('errorPlaceholder').appendChild(loadingMsg);
+            
             try {
-                const result = pyodide.runPython(`
-import json
-result = parse_expression('''${objective}''')
-json.dumps(result)
+                console.log('Loading Pyodide...');
+                pyodide = await loadPyodide();
+                console.log('Pyodide loaded successfully');
+                
+                // Install ply using micropip
+                console.log('Loading micropip...');
+                await pyodide.loadPackage("micropip");
+                console.log('Micropip loaded, installing ply...');
+                const micropip = pyodide.pyimport("micropip");
+                await micropip.install('ply');
+                console.log('PLY installed successfully');
+                
+                // Copy the DCP parser files to Pyodide filesystem
+                console.log('Setting up DCP parser files...');
+                pyodide.runPython(`
+import os
+# Create directory structure in Pyodide
+os.makedirs('dcp_parser', exist_ok=True)
+os.makedirs('dcp_parser/atomic', exist_ok=True)  
+os.makedirs('dcp_parser/error_messages', exist_ok=True)
+os.makedirs('dcp_parser/expression', exist_ok=True)
+os.makedirs('dcp_parser/json', exist_ok=True)
                 `);
                 
-                const parsed = JSON.parse(result);
-                console.log('Parse result:', parsed);
-                console.log('Children:', parsed.children);
-                if (parsed.children && parsed.children.length > 0) {
-                    console.log('First child:', parsed.children[0]);
-                    console.log('Second child:', parsed.children[1]);
-                }
-                if (parsed.error) {
-                    console.error('Parse error:', parsed.error);
-                    if (error_func) {
-                        error_func({responseText: parsed.error}, 'error', parsed.error);
+                // Load DCP parser files via HTTP (since they're in our project)
+                const dcpFiles = [
+                    'dcp_parser/__init__.py',
+                    'dcp_parser/parser.py',
+                    'dcp_parser/atomic/__init__.py',
+                    'dcp_parser/atomic/atom_loader.py',
+                    'dcp_parser/atomic/atoms.py',
+                    'dcp_parser/atomic/monotonicity.py',
+                    'dcp_parser/error_messages/__init__.py',
+                    'dcp_parser/error_messages/composition_error.py',
+                    'dcp_parser/error_messages/constraint_error.py',
+                    'dcp_parser/error_messages/dcp_violation.py',
+                    'dcp_parser/error_messages/dcp_violation_factory.py',
+                    'dcp_parser/error_messages/operation_error.py',
+                    'dcp_parser/error_messages/settings.py',
+                    'dcp_parser/expression/__init__.py',
+                    'dcp_parser/expression/constraints.py',
+                    'dcp_parser/expression/curvature.py',
+                    'dcp_parser/expression/expression.py',
+                    'dcp_parser/expression/settings.py',
+                    'dcp_parser/expression/sign.py',
+                    'dcp_parser/expression/statement.py',
+                    'dcp_parser/json/__init__.py',
+                    'dcp_parser/json/constraint_encoder.py',
+                    'dcp_parser/json/expression_encoder.py',
+                    'dcp_parser/json/settings.py',
+                    'dcp_parser/json/statement_encoder.py'
+                ];
+                
+                // Load each file
+                for (const filePath of dcpFiles) {
+                    try {
+                        console.log(`Loading ${filePath}...`);
+                        const response = await fetch(filePath);
+                        if (response.ok) {
+                            const content = await response.text();
+                            pyodide.FS.writeFile(filePath, content);
+                        } else {
+                            console.warn(`Could not load ${filePath}: ${response.status}`);
+                        }
+                    } catch (e) {
+                        console.warn(`Error loading ${filePath}:`, e);
                     }
-                } else {
-                    console.log('Parse success, calling success_func with:', parsed);
-                    if (success_func) success_func(parsed);
                 }
-            } catch (e) {
-                if (error_func) {
-                    error_func({responseText: e.toString()}, 'error', e.toString());
-                }
-            }
-        };
+                
+                // Initialize the DCP parser
+                console.log('Initializing DCP parser...');
+                pyodide.runPython(`
+import sys
+import os
+
+# Add dcp_parser to path
+sys.path.insert(0, '/home/pyodide')
+
+# Import the original DCP parser components
+try:
+    from dcp_parser.parser import Parser
+    from dcp_parser.json.statement_encoder import StatementEncoder
+    print("DCP parser imported successfully")
+except Exception as e:
+    print(f"Error importing DCP parser: {e}")
+    # Fallback - we'll create a minimal parser
+    class Parser:
+        def __init__(self):
+            self.statements = []
+        def parse(self, text):
+            # Simple fallback
+            pass
+    class StatementEncoder:
+        def encode(self, expr):
+            return '{"error": "DCP parser not available"}'
+
+# Constants for preamble (from dcp_site views.py)
+PREAMBLE = [
+    'variable x y z u v w',
+    'parameter a b c', 
+    'parameter positive d e f'
+]
+
+def parse_expression_with_dcp(text):
+    """Parse expression using the original DCP parser"""
+    try:
+        parser = Parser()
         
-        // Also override the feedback function to show a message
-        $('.btn.feedback').click(function() {
-            alert('Feedback feature is not available in the client-side version.');
+        # Load preamble (variables and parameters)  
+        for line in PREAMBLE:
+            parser.parse(line)
+        
+        # Parse the input expression
+        parser.parse(text)
+        
+        if len(parser.statements) > 0:
+            # Get the last statement (the expression we parsed)
+            expression = parser.statements[-1]
+            
+            # Use the original JSON encoder to convert to dict
+            encoder = StatementEncoder()
+            json_str = encoder.encode(expression)
+            
+            # Parse the JSON string to get the dict
+            import json
+            result = json.loads(json_str)
+            return result
+        else:
+            return {'error': 'No valid expression parsed'}
+            
+    except Exception as e:
+        return {'error': str(e)}
+                `);
+                
+                console.log('DCP parser loaded successfully');
+                
+                // Remove loading message
+                document.getElementById('errorPlaceholder').innerHTML = '';
+                
+                // Override the parse function
+                overrideParseFunction();
+                console.log('Parse function overridden');
+                console.log('Initialization complete');
+                
+            } catch (error) {
+                console.error('Failed to initialize:', error);
+                document.getElementById('errorPlaceholder').innerHTML = 
+                    '<div class="alert alert-danger"><strong>Error!</strong> Failed to initialize: ' + error + '</div>';
+            }
+        }
+        
+        function overrideParseFunction() {
+            // Override TreeConstructor.parseObjective to use the original DCP parser
+            TreeConstructor.parseObjective = function(objective, success_func, error_func) {
+                try {
+                    const result = pyodide.runPython(`
+import json
+result = parse_expression_with_dcp('''${objective}''')
+json.dumps(result)
+                    `);
+                    
+                    const parsed = JSON.parse(result);
+                    console.log('Parse result:', parsed);
+                    
+                    if (parsed.error) {
+                        console.error('Parse error:', parsed.error);
+                        if (error_func) {
+                            error_func({responseText: parsed.error}, 'error', parsed.error);
+                        }
+                    } else {
+                        console.log('Parse success, calling success_func with:', parsed);
+                        if (success_func) success_func(parsed);
+                    }
+                } catch (e) {
+                    console.error('JavaScript error:', e);
+                    if (error_func) {
+                        error_func({responseText: e.toString()}, 'error', e.toString());
+                    }
+                }
+            };
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initPyodide();
         });
-    }
-    
-    // Initialize on page load
-    $(document).ready(function() {
-        initPyodide();
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>

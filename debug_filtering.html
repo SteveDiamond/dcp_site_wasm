@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Filtering</title>
+    <script src="static/js/quiz-operators.js"></script>
+</head>
+<body>
+    <h1>Debug Expression Filtering</h1>
+    <div id="output"></div>
+    
+    <script>
+        function debugFiltering() {
+            const output = [];
+            
+            // Test convex expression filtering
+            const convexPossibility = {convex: true, concave: false, positive: false, negative: false};
+            
+            output.push("<h2>Testing Convex Expression Filtering</h2>");
+            
+            // Test non-terminals first
+            output.push("<h3>Non-terminal operators for convex expressions:</h3>");
+            const nonTerminals = QUIZ_OPERATORS.filter(op => {
+                const terminalMatch = (op.terminal === false);
+                const convexMatch = (op.convex === convexPossibility.convex) || (op.convex === true);
+                const concaveMatch = (op.concave === convexPossibility.concave) || (op.concave === true); 
+                const positiveMatch = (op.positive === convexPossibility.positive) || (op.positive === true);
+                const negativeMatch = (op.negative === convexPossibility.negative) || (op.negative === true);
+                
+                const result = terminalMatch && convexMatch && concaveMatch && positiveMatch && negativeMatch;
+                
+                output.push(`<p>${op.prefix}${op.infix||''}${op.suffix}: terminal=${terminalMatch}, convex=${convexMatch}, concave=${concaveMatch}, positive=${positiveMatch}, negative=${negativeMatch} => ${result}</p>`);
+                
+                return result;
+            });
+            
+            output.push(`<p><strong>Total non-terminals selected: ${nonTerminals.length}</strong></p>`);
+            
+            // Test terminals
+            output.push("<h3>Terminal operators for convex expressions:</h3>");
+            const terminals = QUIZ_OPERATORS.filter(op => {
+                const terminalMatch = (op.terminal === true);
+                const convexMatch = (op.convex === convexPossibility.convex) || (op.convex === true);
+                const concaveMatch = (op.concave === convexPossibility.concave) || (op.concave === true);
+                const positiveMatch = (op.positive === convexPossibility.positive) || (op.positive === true);
+                const negativeMatch = (op.negative === convexPossibility.negative) || (op.negative === true);
+                
+                const result = terminalMatch && convexMatch && concaveMatch && positiveMatch && negativeMatch;
+                
+                output.push(`<p>${op.prefix}${op.suffix}: terminal=${terminalMatch}, convex=${convexMatch}, concave=${concaveMatch}, positive=${positiveMatch}, negative=${negativeMatch} => ${result}</p>`);
+                
+                return result;
+            });
+            
+            output.push(`<p><strong>Total terminals selected: ${terminals.length}</strong></p>`);
+            
+            // Show probability calculation
+            output.push("<h3>Probability Test</h3>");
+            const probTerminate = 0.05;
+            let terminalChoices = 0;
+            let nonTerminalChoices = 0;
+            
+            for (let i = 0; i < 1000; i++) {
+                if (Math.random() < probTerminate) {
+                    terminalChoices++;
+                } else {
+                    nonTerminalChoices++;
+                }
+            }
+            
+            output.push(`<p>Out of 1000 trials with prob_terminate=0.05:</p>`);
+            output.push(`<p>Terminal chosen: ${terminalChoices} times</p>`);
+            output.push(`<p>Non-terminal chosen: ${nonTerminalChoices} times</p>`);
+            
+            document.getElementById('output').innerHTML = output.join('\n');
+        }
+        
+        debugFiltering();
+    </script>
+</body>
+</html>
