@@ -322,6 +322,22 @@ import sys
 sys.modules['__main__'].__file__ = '<interactive>'
 parser = yacc.yacc(debug=False, write_tables=False)
 
+def convert_to_dict(expr):
+    """Convert expression to dict format expected by tree visualization"""
+    if isinstance(expr, Expression):
+        children = [convert_to_dict(se) for se in expr.subexpressions] if expr.subexpressions else None
+        result = {
+            'name': expr.name,
+            'short_name': expr.short_name,
+            'sign': expr.sign,
+            'curvature': expr.curvature
+        }
+        if children:
+            result['children'] = children
+        return result
+    else:
+        return str(expr)
+
 def parse_expression(text):
     global statements
     statements = []
@@ -329,13 +345,7 @@ def parse_expression(text):
         result = parser.parse(text, lexer=lexer)
         if statements:
             expr = statements[-1]
-            return {
-                'name': expr.name,
-                'short_name': expr.short_name, 
-                'sign': expr.sign,
-                'curvature': expr.curvature,
-                'subexpressions': [se.__dict__ if hasattr(se, '__dict__') else str(se) for se in expr.subexpressions]
-            }
+            return convert_to_dict(expr)
         return {'error': 'No valid expression'}
     except Exception as e:
         return {'error': str(e)}
@@ -355,14 +365,19 @@ json.dumps(result)
                 
                 const parsed = JSON.parse(result);
                 console.log('Parse result:', parsed);
+                console.log('Children:', parsed.children);
+                if (parsed.children && parsed.children.length > 0) {
+                    console.log('First child:', parsed.children[0]);
+                    console.log('Second child:', parsed.children[1]);
+                }
                 if (parsed.error) {
                     console.error('Parse error:', parsed.error);
                     if (error_func) {
                         error_func({responseText: parsed.error}, 'error', parsed.error);
                     }
                 } else {
-                    console.log('Parse success, calling success_func with:', result);
-                    if (success_func) success_func(result);
+                    console.log('Parse success, calling success_func with:', parsed);
+                    if (success_func) success_func(parsed);
                 }
             } catch (e) {
                 if (error_func) {
