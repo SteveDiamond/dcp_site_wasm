@@ -261,7 +261,17 @@ FUNC_PROPS = {
     'log': {'curvature': 'concave', 'sign': 'unknown'},
     'max': {'curvature': 'convex', 'sign': 'unknown'},
     'min': {'curvature': 'concave', 'sign': 'unknown'},
-    'pos': {'curvature': 'convex', 'sign': 'positive'}
+    'pos': {'curvature': 'convex', 'sign': 'positive'},
+    'geo_mean': {'curvature': 'concave', 'sign': 'positive'},
+    'log_sum_exp': {'curvature': 'convex', 'sign': 'unknown'},
+    'norm1': {'curvature': 'convex', 'sign': 'positive'},
+    'norm2': {'curvature': 'convex', 'sign': 'positive'},
+    'norm_inf': {'curvature': 'convex', 'sign': 'positive'},
+    'quad_over_lin': {'curvature': 'convex', 'sign': 'positive'},
+    'huber': {'curvature': 'convex', 'sign': 'positive'},
+    'entr': {'curvature': 'concave', 'sign': 'unknown'},
+    'inv_pos': {'curvature': 'convex', 'sign': 'positive'},
+    'kl_div': {'curvature': 'convex', 'sign': 'positive'}
 }
 
 # Parser state
@@ -274,13 +284,27 @@ def p_statement_expr(p):
     statements.append(p[1])
 
 def p_expression_func(p):
-    '''expression : ID LPAREN expression RPAREN'''
+    '''expression : ID LPAREN expression RPAREN
+                 | ID LPAREN expression_list RPAREN'''
     expr = Expression(p[1])
     if p[1] in FUNC_PROPS:
         expr.curvature = FUNC_PROPS[p[1]]['curvature']
         expr.sign = FUNC_PROPS[p[1]]['sign']
-    expr.subexpressions = [p[3]]
+    
+    if len(p) == 5:  # Single argument: ID LPAREN expression RPAREN
+        expr.subexpressions = [p[3]]
+    else:  # Multiple arguments: ID LPAREN expression_list RPAREN  
+        expr.subexpressions = p[3] if isinstance(p[3], list) else [p[3]]
     p[0] = expr
+
+def p_expression_list(p):
+    '''expression_list : expression
+                      | expression_list COMMA expression'''
+    if len(p) == 2:  # Single expression
+        p[0] = [p[1]]
+    else:  # expression_list COMMA expression
+        p[1].append(p[3])
+        p[0] = p[1]
 
 def p_expression_binop(p):
     '''expression : expression PLUS expression
