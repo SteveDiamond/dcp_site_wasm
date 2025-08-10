@@ -159,11 +159,8 @@
     ];
     
     async function initPyodide() {
-        // Show loading message
-        const loadingMsg = document.createElement('div');
-        loadingMsg.className = 'alert alert-info';
-        loadingMsg.innerHTML = '<strong>Loading...</strong> Initializing Python environment for DCP analysis...';
-        document.getElementById('errorPlaceholder').appendChild(loadingMsg);
+        // Get the loading message that was already created
+        const loadingMsg = document.getElementById('loadingMsg');
         
         try {
             console.log('Loading Pyodide...');
@@ -188,7 +185,7 @@
             console.log('Parse function overridden');
             
             // Remove loading message
-            loadingMsg.remove();
+            if (loadingMsg) loadingMsg.remove();
             
             // Start the quiz
             console.log('Initialization complete - starting quiz');
@@ -198,8 +195,10 @@
             }
         } catch (error) {
             console.error('Initialization error:', error);
-            loadingMsg.className = 'alert alert-error';
-            loadingMsg.innerHTML = '<strong>Error!</strong> Failed to initialize: ' + error.message + '<br><small>Check browser console for details</small>';
+            if (loadingMsg) {
+                loadingMsg.className = 'alert alert-error';
+                loadingMsg.innerHTML = '<strong>Error!</strong> Failed to initialize: ' + error.message + '<br><small>Check browser console for details</small>';
+            }
         }
     }
     
@@ -344,8 +343,18 @@ json.dumps(result)
         });
     }
     
+    // Show loading message immediately
+    function showLoadingMessage() {
+        const loadingMsg = document.createElement('div');
+        loadingMsg.className = 'alert alert-info';
+        loadingMsg.id = 'loadingMsg';
+        loadingMsg.innerHTML = '<strong>Loading...</strong> Initializing Python environment for DCP analysis...';
+        document.getElementById('errorPlaceholder').appendChild(loadingMsg);
+    }
+    
     // Initialize on page load
     $(document).ready(function() {
+        showLoadingMessage();
         initPyodide();
     });
   </script>
