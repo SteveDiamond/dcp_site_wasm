@@ -31,7 +31,8 @@ function showTreeFromUrl() {
 	showTreeFromUrl();
     });
 
-    $().ready(function(){
-	showTreeFromUrl();
-    });
+    // Don't auto-show tree on ready - let Pyodide initialization handle it
+    // $().ready(function(){
+    //     showTreeFromUrl();
+    // });
 }(jQuery));

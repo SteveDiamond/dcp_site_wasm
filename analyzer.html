@@ -137,7 +137,7 @@
             await pyodide.loadPackage(['micropip']);
             
             // Install ply
-            await pyodide.runPython(`
+            await pyodide.runPythonAsync(`
                 import micropip
                 await micropip.install('ply')
             `);
@@ -151,8 +151,10 @@
             // Remove loading message
             loadingMsg.remove();
             
-            // Show tree if expression in URL
-            showTreeFromUrl();
+            // Show tree if expression in URL, but only after Pyodide is ready
+            if (typeof showTreeFromUrl === 'function') {
+                showTreeFromUrl();
+            }
         } catch (error) {
             loadingMsg.className = 'alert alert-error';
             loadingMsg.innerHTML = '<strong>Error!</strong> Failed to initialize: ' + error.message;
